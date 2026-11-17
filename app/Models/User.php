@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -45,6 +46,11 @@ public function orders(): HasMany
 public function seller(): HasOne
 {
     return $this->hasOne(Seller::class);
+}
+
+public function savedSneakers(): BelongsToMany
+{
+    return $this->belongsToMany(Sneaker::class, 'saved_sneakers')->withTimestamps();
 }
 
 }
