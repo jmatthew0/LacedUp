@@ -57,4 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/offers/{offer}/reply', [OfferController::class, 'reply']);
     Route::post('/offers/{offer}/checkout', [OfferController::class, 'checkout']);
 
+    Route::post('/orders/{code}/confirm', [OrderController::class, 'confirm']);
+    Route::post('/orders/{code}/items/{item}/review', [OrderController::class, 'review']);
+
 });
