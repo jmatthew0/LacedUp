@@ -5,6 +5,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { peso } from '@/lib/format';
 import { Sneaker } from '@/types';
 import HeartButton from '@/Components/HeartButton';
+import OfferBox from '@/Components/OfferBox';
 
 export default function ProductDetail({ sneaker, similar }: { sneaker: Sneaker; similar: Sneaker[] }) {
   const [size, setSize] = useState<number | null>(null);

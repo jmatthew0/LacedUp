@@ -13,7 +13,7 @@ export default function HeroSlide({ s }: { s: Slide }) {
         <p className="display text-2xl" style={{ fontStretch: '110%' }}>{peso(s.price)}</p>
         <div className="mt-4 flex gap-3">
           <Link href={`/sneakers/${s.slug}`} className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold">Shop this drop</Link>
-          <button className="rounded-full border border-white/40 px-5 py-2.5 text-sm">Make an offer</button>
+          <Link href={`/sneakers/${s.slug}`} className="rounded-full border border-white/40 px-5 py-2.5 text-sm">Make an offer</Link>
         </div>
       </div>
       <img src={s.image} alt={s.title} className="mx-auto max-h-64 object-contain drop-shadow-2xl" />
