@@ -10,11 +10,11 @@ class ProductController extends Controller
 {
     public function show(string $slug): Response
     {
-        $sneaker = Sneaker::with('seller')->where('slug', $slug)->firstOrFail();
+        $sneaker = Sneaker::available()->with('seller')->where('slug', $slug)->firstOrFail();
 
         return Inertia::render('ProductDetail', [
             'sneaker' => $sneaker->toCard(),
-            'similar' => Sneaker::with('seller')->where('id', '!=', $sneaker->id)->take(3)->get()->map->toCard(),
+            'similar' => Sneaker::available()->with('seller')->where('id', '!=', $sneaker->id)->take(3)->get()->map->toCard(),
         ]);
     }
 }

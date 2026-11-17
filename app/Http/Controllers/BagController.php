@@ -15,10 +15,13 @@ class BagController extends Controller
     {
         $bag = $request->user()->bagItems();
 
+        // Drop pairs someone else already bought.
+        (clone $bag)->whereHas('sneaker', fn ($q) => $q->whereNotNull('sold_at'))->delete();
+
         return Inertia::render('Bag', [
             'items' => (clone $bag)->with('sneaker.seller')->get()
                 ->map(fn ($b) => ['id' => $b->id, 'size' => $b->size] + $b->sneaker->toCard())->values(),
-            'more' => Sneaker::with('seller')->whereNotIn('id', (clone $bag)->pluck('sneaker_id'))->take(3)->get()->map->toCard(),
+            'more' => Sneaker::available()->with('seller')->whereNotIn('id', (clone $bag)->pluck('sneaker_id'))->take(3)->get()->map->toCard(),
         ]);
     }
 
@@ -30,7 +33,7 @@ class BagController extends Controller
             'checkout' => ['boolean'],
         ]);
 
-        $sneaker = Sneaker::where('slug', $data['slug'])->firstOrFail();
+        $sneaker = Sneaker::available()->where('slug', $data['slug'])->firstOrFail();
         $request->user()->bagItems()->updateOrCreate(['sneaker_id' => $sneaker->id], ['size' => $data['size'] ?? null]);
 
         return redirect($request->boolean('checkout') ? '/checkout' : '/bag');

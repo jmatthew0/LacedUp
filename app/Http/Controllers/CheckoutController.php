@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Sneaker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 
 class CheckoutController extends Controller
 {
@@ -20,7 +22,7 @@ class CheckoutController extends Controller
     public function show(Request $request): Response|RedirectResponse
     {
         $bag = $request->user()->bagItems()->with('sneaker.seller')->get();
-        if ($bag->isEmpty()) {
+        if ($bag->isEmpty() || $bag->contains(fn ($b) => $b->sneaker->sold_at)) {
             return redirect('/bag');
         }
 
@@ -47,31 +49,42 @@ class CheckoutController extends Controller
             return redirect('/bag');
         }
 
-        $order = DB::transaction(function () use ($request, $data, $bag) {
-            $subtotal = $bag->sum(fn ($b) => $b->sneaker->price);
-            $shipping = self::SHIPPING[$data['shipping']];
+        try {
+            $order = DB::transaction(function () use ($request, $data, $bag) {
+                // Claim every pair first. If any was just sold, nothing is saved.
+                $claimed = Sneaker::whereIn('id', $bag->pluck('sneaker_id'))->whereNull('sold_at')->update(['sold_at' => now()]);
+                if ($claimed !== $bag->count()) {
+                    throw new RuntimeException('Pair already sold');
+                }
 
-            $order = Order::create([
-                'user_id' => $request->user()->id,
-                'code' => 'LU-'.strtoupper(Str::random(6)),
-                'subtotal' => $subtotal, 'shipping' => $shipping, 'fee' => self::FEE,
-                'total' => $subtotal + $shipping + self::FEE,
-                'shipping_method' => $data['shipping'], 'payment_method' => $data['payment'],
-                'address' => $request->only('name', 'phone', 'address', 'city', 'postal'),
-            ]);
+                $subtotal = $bag->sum(fn ($b) => $b->sneaker->price);
+                $shipping = self::SHIPPING[$data['shipping']];
 
-            foreach ($bag as $b) {
-                $order->items()->create([
-                    'sneaker_id' => $b->sneaker_id, 'name' => $b->sneaker->name, 'image' => $b->sneaker->image,
-                    'seller' => $b->sneaker->seller->handle, 'condition' => $b->sneaker->condition,
-                    'size' => $b->size, 'price' => $b->sneaker->price,
+                $order = Order::create([
+                    'user_id' => $request->user()->id,
+                    'code' => 'LU-'.strtoupper(Str::random(6)),
+                    'subtotal' => $subtotal, 'shipping' => $shipping, 'fee' => self::FEE,
+                    'total' => $subtotal + $shipping + self::FEE,
+                    'shipping_method' => $data['shipping'], 'payment_method' => $data['payment'],
+                    'address' => $request->only('name', 'phone', 'address', 'city', 'postal'),
                 ]);
-            }
 
-            $request->user()->bagItems()->delete();
+                foreach ($bag as $b) {
+                    $order->items()->create([
+                        'sneaker_id' => $b->sneaker_id, 'name' => $b->sneaker->name, 'image' => $b->sneaker->image,
+                        'seller' => $b->sneaker->seller->handle, 'condition' => $b->sneaker->condition,
+                        'size' => $b->size, 'price' => $b->sneaker->price,
+                    ]);
+                }
 
-            return $order;
-        });
+                $request->user()->bagItems()->delete();
+
+                return $order;
+            });
+        } catch (RuntimeException) {
+            // The bag page clears out any pair that is no longer available.
+            return redirect('/bag');
+        }
 
         return redirect('/orders/'.$order->code);
     }
