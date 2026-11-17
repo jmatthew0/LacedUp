@@ -1,9 +1,10 @@
+import { Link } from '@inertiajs/react';
 import { Seller } from '@/types';
 
 export default function SellerCard({ s }: { s: Seller }) {
   return (
     <article className="h-full rounded-2xl bg-white p-4">
-      <p className="text-sm font-bold">{s.name}</p>
+      <Link href={`/sellers/${s.handle}`} className="text-sm font-bold hover:text-ember">{s.name}</Link>
       <p className="text-[11px] text-black/50">@{s.handle}</p>
       <p className="mt-3 min-h-[48px] text-xs text-black/70">{s.bio}</p>
       <dl className="my-4 grid grid-cols-3 border-y border-stone py-3 text-center">
