@@ -22,7 +22,10 @@ export default function Bell() {
       <button onClick={() => setOpen(!open)} aria-haspopup="menu" aria-expanded={open}
         aria-label={`Notifications${notifications.unread ? `, ${notifications.unread} unread` : ''}`}
         className="relative grid h-9 w-9 place-items-center rounded-full bg-white text-base">
-        🔔
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8" />
+        <path d="M10.3 20a1.9 1.9 0 0 0 3.4 0" />
+            </svg>
         {notifications.unread > 0 && (
           <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-ember px-1 text-[10px] font-bold text-white">
             {notifications.unread > 9 ? '9+' : notifications.unread}
