@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\SavedController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -45,5 +46,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/listings', [ListingController::class, 'store']);
     Route::delete('/listings/{sneaker:slug}', [ListingController::class, 'destroy']);
+
+    Route::get('/saved', [SavedController::class, 'index']);
+    Route::post('/saved/{slug}', [SavedController::class, 'toggle']);
 
 });
