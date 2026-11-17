@@ -13,6 +13,7 @@ use App\Http\Controllers\ListingController;
 use App\Http\Controllers\SavedController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\NotificationController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -65,4 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/settings/account', [SettingsController::class, 'account']);
     Route::put('/settings/password', [SettingsController::class, 'password']);
     Route::post('/settings/seller', [SettingsController::class, 'seller']);
+
+    Route::get('/notifications/{id}', [NotificationController::class, 'open']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll']);
 });
