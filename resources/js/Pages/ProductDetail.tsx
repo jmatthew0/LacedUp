@@ -4,6 +4,7 @@ import SneakerCard from '@/Components/SneakerCard';
 import AppLayout from '@/Layouts/AppLayout';
 import { peso } from '@/lib/format';
 import { Sneaker } from '@/types';
+import HeartButton from '@/Components/HeartButton';
 
 export default function ProductDetail({ sneaker, similar }: { sneaker: Sneaker; similar: Sneaker[] }) {
   const [size, setSize] = useState<number | null>(null);
@@ -27,6 +28,7 @@ export default function ProductDetail({ sneaker, similar }: { sneaker: Sneaker; 
             ))}
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
+          <HeartButton slug={sneaker.slug} className="!h-12 !w-12 border border-ink/40" />
             <button disabled={!size} onClick={() => add(true)} className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white disabled:opacity-40">Buy now</button>
             <button disabled={!size} onClick={() => add(false)} className="rounded-full border border-ink/40 px-6 py-3 text-sm disabled:opacity-40">Add to bag</button>
           </div>

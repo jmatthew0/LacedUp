@@ -33,6 +33,7 @@ function UserMenu({ user }: { user: User }) {
           </div>
           <div className="pt-1">
             <Link href="/orders" className={item}>My orders</Link>
+            <Link href="/saved" className={item}>Saved pairs</Link>
             <Link href="/dashboard" className={item}>Seller dashboard</Link>
             <button onClick={() => router.post('/sign-out')} className={item}>Sign out</button>
           </div>
