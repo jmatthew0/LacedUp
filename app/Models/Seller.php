@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Seller extends Model
 {
-    protected $fillable = ['user_id', 'handle', 'name', 'bio', 'sales', 'rating', 'on_time'];
+    protected $fillable = ['user_id', 'handle', 'name', 'bio', 'avatar', 'sales', 'rating', 'on_time'];
 
     protected $casts = ['rating' => 'float'];
 
@@ -24,7 +24,7 @@ class Seller extends Model
     public function toCard(): array
     {
         return [
-            'handle' => $this->handle, 'name' => $this->name, 'bio' => $this->bio,
+            'handle' => $this->handle, 'name' => $this->name, 'bio' => $this->bio, 'avatar' => $this->avatar,
             'sales' => $this->sales, 'rating' => $this->rating, 'onTime' => $this->on_time,
         ];
     }
