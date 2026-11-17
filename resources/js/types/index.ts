@@ -10,8 +10,12 @@ export interface HeroSlide {
 }
 
 export interface BagLine extends Sneaker { id: number; size: string | null }
-export interface OrderItem { name: string; image: string; seller: string; condition: string; size: string | null; price: number }
+export interface OrderItem {
+  id: number; name: string; image: string; seller: string; condition: string; size: string | null; price: number;
+  review: { rating: number; comment: string | null } | null;
+}
 export interface OrderData {
   code: string; status: string; stage: number; total: number; subtotal: number; shipping: number; fee: number;
-  shippingMethod: string; paymentMethod: string; address: Record<string, string>; placedAt: string; items: OrderItem[];
+  shippingMethod: string; paymentMethod: string; address: Record<string, string>; placedAt: string;
+  confirmed: boolean; items: OrderItem[];
 }

@@ -1,7 +1,7 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import { peso } from '@/lib/format';
-import { OrderData } from '@/types';
+import { OrderData, OrderItem } from '@/types';
 
 const stages = [
   ['Order placed', 'Your order was received'],
@@ -12,9 +12,41 @@ const stages = [
 ];
 const headline = ['Order placed', 'Verified', 'In transit', 'Out for delivery', 'Delivered'];
 
+function ReviewBox({ code, item }: { code: string; item: OrderItem }) {
+  const form = useForm({ rating: 0, comment: '' });
+
+  if (item.review) {
+    return (
+      <p className="rounded-lg bg-paper p-3">
+        You rated {item.seller} <b className="text-ember">{'★'.repeat(item.review.rating)}</b>
+        {item.review.comment ? ` · “${item.review.comment}”` : ''}
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-2 rounded-lg bg-paper p-3">
+      <p className="font-semibold">Rate {item.seller} for {item.name}</p>
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button key={n} type="button" aria-label={`${n} star${n > 1 ? 's' : ''}`} onClick={() => form.setData('rating', n)}
+            className={`text-2xl leading-none ${n <= form.data.rating ? 'text-ember' : 'text-black/25'}`}>★</button>
+        ))}
+      </div>
+      <textarea value={form.data.comment} onChange={(e) => form.setData('comment', e.target.value)} maxLength={500} rows={2}
+        placeholder="How was the pair and the shipping? (optional)" aria-label="Review comment"
+        className="w-full rounded-xl bg-white px-3 py-2 text-xs" />
+      {form.errors.rating && <p className="text-ember">{form.errors.rating}</p>}
+      <button disabled={!form.data.rating || form.processing} onClick={() => form.post(`/orders/${code}/items/${item.id}/review`, { preserveScroll: true })}
+        className="rounded-full bg-ink px-4 py-1.5 font-semibold text-white disabled:opacity-40">Submit review</button>
+    </div>
+  );
+}
+
 export default function Tracking({ order }: { order: OrderData }) {
   const at = order.stage;
   const a = order.address;
+
   return (
     <AppLayout>
       <Head title={`Order ${order.code}`} />
@@ -44,16 +76,25 @@ export default function Tracking({ order }: { order: OrderData }) {
             ))}
           </ol>
         </div>
+
         <aside className="h-fit space-y-3 rounded-2xl bg-white p-5 text-xs">
           {order.items.map((i) => (
-            <div key={i.name} className="flex gap-3">
+            <div key={i.id} className="flex gap-3">
               <img src={i.image} alt="" className="h-14 w-14 rounded-lg bg-stone object-contain" />
               <div><b className="text-sm">{i.name}</b><br />{i.size ? `US ${i.size} · ` : ''}{peso(i.price)}</div>
             </div>
           ))}
           <p className="border-t border-stone pt-3">Total <b>{peso(order.total)}</b> · {order.paymentMethod}</p>
           <p className="rounded-lg bg-paper p-3">Deliver to<br /><b>{a.name}</b><br />{a.address}, {a.city} {a.postal}<br />{order.shippingMethod}</p>
-          <button disabled={at < 4} className="w-full rounded-full bg-ink py-2.5 font-semibold text-white disabled:opacity-30">Confirm delivery</button>
+
+          <button disabled={at < 4 || order.confirmed} onClick={() => router.post(`/orders/${order.code}/confirm`, {}, { preserveScroll: true })}
+            className="w-full rounded-full bg-ink py-2.5 font-semibold text-white disabled:opacity-30">
+            {order.confirmed ? 'Delivery confirmed' : 'Confirm delivery'}
+          </button>
+          {!order.confirmed && <p className="text-black/50">Confirming tells us the pair arrived as described and releases the payment to the seller.</p>}
+
+          {order.confirmed && order.items.map((i) => <ReviewBox key={i.id} code={order.code} item={i} />)}
+
           <div className="flex gap-2">
             <button className="flex-1 rounded-full border border-ink/40 py-2">Open dispute</button>
             <button className="flex-1 rounded-full border border-ink/40 py-2">Request return</button>
