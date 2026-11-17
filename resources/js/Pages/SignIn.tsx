@@ -15,7 +15,7 @@ export default function SignIn() {
   return (
     <div className="grid min-h-screen md:grid-cols-2">
       <Head title="Sign in" />
-      <div className="flex flex-col justify-between bg-ink p-10 text-white">
+      <div className="hidden flex-col justify-between bg-ink p-10 text-white md:flex">
         <Link href="/" className="display text-lg">Laced<span className="text-ember">Up</span></Link>
         <div>
           <h1 className="display text-6xl">Discover. Buy. Sell.</h1>
@@ -29,7 +29,8 @@ export default function SignIn() {
       </div>
 
       <div className="grid place-items-center p-8">
-        <form onSubmit={submit} className="w-full max-w-sm space-y-3">
+      <form onSubmit={submit} className="w-full max-w-sm space-y-3">
+      <Link href="/" className="display mb-8 block text-lg md:hidden">Laced<span className="text-ember">Up</span></Link>
           <div className="mb-6 flex rounded-full bg-white p-1 text-xs">
             {(['in', 'up'] as const).map((m) => (
               <button type="button" key={m} onClick={() => switchMode(m)} className={`flex-1 rounded-full py-2 ${mode === m ? 'bg-ink text-white' : ''}`}>

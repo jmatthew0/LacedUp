@@ -30,7 +30,7 @@ export default function Marketplace({ hero, sneakers, sellers }: Props) {
         {hero.map((s) => <HeroSlide key={s.slug} s={s} />)}
       </Carousel>
 
-      <ul className="my-8 grid gap-4 border-y border-stone py-4 text-xs sm:grid-cols-4">
+      <ul className="my-8 grid grid-cols-2 gap-4 border-y border-stone py-4 text-xs sm:grid-cols-4">
         {['Authenticity verified', 'Ships in 48 hours', 'Escrow payments', '4.9 average seller rating'].map((t) => <li key={t} className="font-semibold">{t}</li>)}
       </ul>
 

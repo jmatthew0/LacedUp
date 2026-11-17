@@ -50,9 +50,9 @@ export default function Tracking({ order }: { order: OrderData }) {
   return (
     <AppLayout>
       <Head title={`Order ${order.code}`} />
-      <section className="mt-6 rounded-3xl bg-ink p-8 text-white">
+      <section className="mt-6 rounded-3xl bg-ink p-5 text-white sm:p-8">
         <p className="text-xs text-ember">Order {order.code}</p>
-        <h1 className="display mt-2 text-5xl">{headline[at]}</h1>
+        <h1 className="display mt-2 text-3xl sm:text-5xl">{headline[at]}</h1>
         <ol className="my-8 grid grid-cols-5 gap-2 text-center text-[11px]">
           {stages.map(([n], i) => (
             <li key={n}>

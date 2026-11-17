@@ -13,7 +13,7 @@ export default function HeartButton({ slug, className = '' }: { slug: string; cl
 
   return (
     <button onClick={click} aria-pressed={on} aria-label={on ? 'Remove from saved pairs' : 'Save pair'}
-      className={`grid h-8 w-8 place-items-center rounded-full bg-white/90 text-base hover:text-ember ${on ? 'text-ember' : 'text-ink/50'} ${className}`}>
+      className={`grid h-9 w-9 place-items-center rounded-full bg-white/90 text-base hover:text-ember ${on ? 'text-ember' : 'text-ink/50'} ${className}`}>
       {on ? '♥' : '♡'}
     </button>
   );

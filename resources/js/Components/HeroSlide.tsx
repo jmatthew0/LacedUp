@@ -4,7 +4,7 @@ import { HeroSlide as Slide } from '@/types';
 
 export default function HeroSlide({ s }: { s: Slide }) {
   return (
-    <article className="grid min-h-[340px] items-center gap-6 rounded-3xl bg-ink p-8 text-white md:grid-cols-2 md:p-12">
+    <article className="grid min-h-[340px] items-center gap-6 rounded-3xl bg-ink p-6 text-white md:grid-cols-2 md:p-12">
       <div>
         <span className="rounded-full bg-white/10 px-3 py-1 text-[11px]">{s.badge}</span>
         <h1 className="display mt-5 text-4xl md:text-6xl">{s.title}</h1>

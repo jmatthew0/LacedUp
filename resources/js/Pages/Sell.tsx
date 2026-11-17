@@ -20,9 +20,9 @@ export default function Sell({ models }: { models: Sneaker[] }) {
   return (
     <AppLayout>
       <Head title="List a pair" />
-      <h1 className="display mt-6 text-5xl">List a pair</h1>
+      <h1 className="display mt-6 text-4xl sm:text-5xl">List a pair</h1>
       <div className="mt-6 grid gap-6 md:grid-cols-[180px_1fr_300px]">
-        <ol className="space-y-3 text-sm">
+      <ol className="flex flex-wrap gap-x-4 gap-y-1 text-xs md:block md:space-y-3 md:text-sm">
           {steps.map((n, i) => <li key={n} className={i === step ? 'font-bold' : 'text-black/50'}>{i + 1}. {n}</li>)}
         </ol>
 

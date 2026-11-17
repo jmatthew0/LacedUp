@@ -71,7 +71,7 @@ export default function Dashboard({ seller, stats, listings, toShip, offers }: P
         </div>
       </div>
 
-      <div className="my-6 grid gap-3 sm:grid-cols-5">
+      <div className="my-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
         {cards.map(([l, v]) => <div key={l} className="rounded-2xl bg-white p-4"><p className="text-[10px] text-black/50">{l}</p><p className="display text-xl">{v}</p></div>)}
       </div>
 

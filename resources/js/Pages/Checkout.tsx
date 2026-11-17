@@ -25,7 +25,7 @@ export default function Checkout({ items, fee }: { items: BagLine[]; fee: number
   return (
     <AppLayout>
       <Head title="Checkout" />
-      <h1 className="display mt-6 text-5xl">Checkout</h1>
+      <h1 className="display mt-6 text-4xl sm:text-5xl">Checkout</h1>
       <ol className="my-6 grid grid-cols-3 gap-2 text-xs">
         {['Shipping', 'Payment', 'Review'].map((n, i) => (
           <li key={n} className={`border-t-2 pt-2 ${i <= step ? 'border-ember font-semibold' : 'border-stone'}`}>{i + 1}. {n}</li>
