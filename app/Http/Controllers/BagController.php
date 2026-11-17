@@ -20,7 +20,7 @@ class BagController extends Controller
 
         return Inertia::render('Bag', [
             'items' => (clone $bag)->with('sneaker.seller')->get()
-                ->map(fn ($b) => ['id' => $b->id, 'size' => $b->size] + $b->sneaker->toCard())->values(),
+                ->map(fn ($b) => ['id' => $b->id, 'size' => $b->size, 'price' => $b->price ?? $b->sneaker->price] + $b->sneaker->toCard())->values(),
             'more' => Sneaker::available()->with('seller')->whereNotIn('id', (clone $bag)->pluck('sneaker_id'))->take(3)->get()->map->toCard(),
         ]);
     }
@@ -34,7 +34,7 @@ class BagController extends Controller
         ]);
 
         $sneaker = Sneaker::available()->where('slug', $data['slug'])->firstOrFail();
-        $request->user()->bagItems()->updateOrCreate(['sneaker_id' => $sneaker->id], ['size' => $data['size'] ?? null]);
+        $request->user()->bagItems()->updateOrCreate(['sneaker_id' => $sneaker->id], ['size' => $data['size'] ?? null, 'price' => null]);
 
         return redirect($request->boolean('checkout') ? '/checkout' : '/bag');
     }

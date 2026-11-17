@@ -27,7 +27,7 @@ class CheckoutController extends Controller
         }
 
         return Inertia::render('Checkout', [
-            'items' => $bag->map(fn ($b) => ['id' => $b->id, 'size' => $b->size] + $b->sneaker->toCard())->values(),
+            'items' => $bag->map(fn ($b) => ['id' => $b->id, 'size' => $b->size, 'price' => $b->price ?? $b->sneaker->price] + $b->sneaker->toCard())->values(),
             'fee' => self::FEE,
         ]);
     }
@@ -57,7 +57,7 @@ class CheckoutController extends Controller
                     throw new RuntimeException('Pair already sold');
                 }
 
-                $subtotal = $bag->sum(fn ($b) => $b->sneaker->price);
+                $subtotal = $bag->sum(fn ($b) => $b->price ?? $b->sneaker->price);
                 $shipping = self::SHIPPING[$data['shipping']];
 
                 $order = Order::create([
@@ -73,7 +73,7 @@ class CheckoutController extends Controller
                     $order->items()->create([
                         'sneaker_id' => $b->sneaker_id, 'name' => $b->sneaker->name, 'image' => $b->sneaker->image,
                         'seller' => $b->sneaker->seller->handle, 'condition' => $b->sneaker->condition,
-                        'size' => $b->size, 'price' => $b->sneaker->price,
+                        'size' => $b->size, 'price' => $b->price ?? $b->sneaker->price,
                     ]);
                 }
 
