@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\SavedController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\SettingsController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -60,4 +61,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{code}/confirm', [OrderController::class, 'confirm']);
     Route::post('/orders/{code}/items/{item}/review', [OrderController::class, 'review']);
 
+    Route::get('/settings', [SettingsController::class, 'show']);
+    Route::patch('/settings/account', [SettingsController::class, 'account']);
+    Route::put('/settings/password', [SettingsController::class, 'password']);
+    Route::post('/settings/seller', [SettingsController::class, 'seller']);
 });
