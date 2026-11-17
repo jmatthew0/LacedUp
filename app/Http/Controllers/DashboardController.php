@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -35,5 +37,21 @@ class DashboardController extends Controller
             'toShip' => (clone $sales)->whereHas('order', fn ($q) => $q->where('stage', '<', 2))->with('order')->get()
                 ->map(fn ($i) => ['name' => $i->name, 'size' => $i->size, 'code' => $i->order->code])->values(),
         ]);
+    }
+
+    public function ship(Request $request, string $code): RedirectResponse
+    {
+        $seller = $request->user()->seller;
+        abort_unless($seller, 403);
+
+        $order = Order::where('code', $code)
+            ->whereHas('items', fn ($q) => $q->where('seller', $seller->handle))
+            ->firstOrFail();
+
+        if ($order->stage < 2) {
+            $order->update(['stage' => 2]);
+        }
+
+        return back();
     }
 }

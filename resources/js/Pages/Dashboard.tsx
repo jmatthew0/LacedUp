@@ -45,7 +45,8 @@ export default function Dashboard({ seller, stats, listings, toShip }: Props) {
         <h2 className="display mb-3 text-base">Orders to ship</h2>
         {toShip.length ? toShip.map((o) => (
           <div key={o.code + o.name} className="flex items-center justify-between border-t border-stone py-3 text-sm">
-            <span>{o.name}{o.size ? ` · US ${o.size}` : ''}</span><span className="text-xs text-black/60">Order {o.code}</span>
+            <span>{o.name}{o.size ? ` · US ${o.size}` : ''}<span className="ml-2 text-xs text-black/60">Order {o.code}</span></span>
+            <button onClick={() => router.post(`/dashboard/orders/${o.code}/ship`, {}, { preserveScroll: true })} className="rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-white">Mark shipped</button>
           </div>
         )) : <p className="border-t border-stone pt-3 text-sm text-black/60">Nothing to ship right now.</p>}
       </section>
