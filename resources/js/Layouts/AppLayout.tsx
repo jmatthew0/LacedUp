@@ -1,5 +1,6 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { FormEvent, PropsWithChildren, useEffect, useRef, useState } from 'react';
+import Bell from '@/Components/Bell';
 
 const nav = ['New In', 'Men', 'Women', 'Kids', 'Retro', 'Sellers'];
 const navHref = (n: string) => `/search?q=${n === 'Retro' ? 'retro' : ''}`;
@@ -73,6 +74,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
           <form onSubmit={submit} className="hidden md:block">
             <input aria-label="Search models" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search models, brands" className="w-48 rounded-full bg-white px-4 py-2 text-xs" />
           </form>
+          {auth.user && <Bell />}
           <Link href="/bag" className="shrink-0 whitespace-nowrap text-xs hover:text-ember">Bag</Link>
           {auth.user ? <UserMenu user={auth.user} /> : <Link href="/sign-in" className="shrink-0 whitespace-nowrap text-xs hover:text-ember">Sign in</Link>}
           <Link href="/sell" className="hidden shrink-0 whitespace-nowrap rounded-full bg-ember px-4 py-2 text-xs font-semibold text-white sm:block">Sell a pair</Link>
