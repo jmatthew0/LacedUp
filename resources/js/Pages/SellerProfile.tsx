@@ -17,7 +17,12 @@ export default function SellerProfile({ seller, listings, reviews }: { seller: S
       <header className="mt-4 overflow-hidden rounded-3xl bg-ink text-white">
         <div className="h-32 bg-gradient-to-r from-ember to-ink" />
         <div className="flex flex-wrap items-center justify-between gap-4 p-6">
-          <div><h1 className="display text-3xl">{seller.name}</h1><p className="text-xs text-white/60">@{seller.handle}</p><p className="mt-2 max-w-md text-sm text-white/80">{seller.bio}</p></div>
+        <div className="flex items-center gap-4">
+  {seller.avatar
+    ? <img src={seller.avatar} alt="" className="h-16 w-16 rounded-full object-cover" />
+    : <span className="grid h-16 w-16 place-items-center rounded-full bg-ember text-xl font-bold">{seller.name[0]}</span>}
+  <div><h1 className="display text-3xl">{seller.name}</h1><p className="text-xs text-white/60">@{seller.handle}</p><p className="mt-2 max-w-md text-sm text-white/80">{seller.bio}</p></div>
+</div>
           <button onClick={() => setFollowing(!following)} className="rounded-full bg-white px-5 py-2 text-xs font-semibold text-ink">{following ? 'Following' : 'Follow'}</button>
         </div>
       </header>
