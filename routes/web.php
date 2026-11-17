@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\SavedController;
+use App\Http\Controllers\OfferController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -49,5 +50,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/saved', [SavedController::class, 'index']);
     Route::post('/saved/{slug}', [SavedController::class, 'toggle']);
+
+    Route::get('/offers', [OfferController::class, 'index']);
+    Route::post('/offers', [OfferController::class, 'store']);
+    Route::post('/offers/{offer}/respond', [OfferController::class, 'respond']);
+    Route::post('/offers/{offer}/reply', [OfferController::class, 'reply']);
+    Route::post('/offers/{offer}/checkout', [OfferController::class, 'checkout']);
 
 });
