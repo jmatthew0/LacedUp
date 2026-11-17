@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Data\Catalog;
+use App\Models\Seller;
+use App\Models\Sneaker;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PageController extends Controller
 {
-    private function all() { return collect(Catalog::sneakers()); }
+    private function all() { return Sneaker::with('seller')->get()->map->toCard(); }
 
     public function search(Request $r): Response
     {
@@ -41,11 +43,13 @@ class PageController extends Controller
     public function tracking(string $id): Response { return Inertia::render('Tracking', ['id' => $id, 'item' => $this->all()->first()]); }
 
     public function seller(string $handle): Response
-    {
-        $seller = collect(Catalog::sellers())->firstWhere('handle', $handle);
-        abort_unless($seller, 404);
-        return Inertia::render('SellerProfile', ['seller' => $seller, 'listings' => $this->all()->where('seller', $handle)->values()]);
-    }
+{
+    $seller = Seller::where('handle', $handle)->firstOrFail();
+    return Inertia::render('SellerProfile', [
+        'seller' => $seller->toCard(),
+        'listings' => $seller->sneakers()->with('seller')->get()->map->toCard(),
+    ]);
+}
 
     public function sell(): Response { return Inertia::render('Sell', ['models' => $this->all()]); }
 

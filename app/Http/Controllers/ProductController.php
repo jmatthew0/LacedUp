@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Data\Catalog;
+use App\Models\Sneaker;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -10,12 +10,11 @@ class ProductController extends Controller
 {
     public function show(string $slug): Response
     {
-        $all = collect(Catalog::sneakers());
-        abort_unless($sneaker = $all->firstWhere('slug', $slug), 404);
+        $sneaker = Sneaker::with('seller')->where('slug', $slug)->firstOrFail();
 
         return Inertia::render('ProductDetail', [
-            'sneaker' => $sneaker,
-            'similar' => $all->where('slug', '!=', $slug)->take(3)->values(),
+            'sneaker' => $sneaker->toCard(),
+            'similar' => Sneaker::with('seller')->where('id', '!=', $sneaker->id)->take(3)->get()->map->toCard(),
         ]);
     }
 }
