@@ -8,3 +8,10 @@ export interface Seller {
 export interface HeroSlide {
   badge: string; title: string; blurb: string; price: number; slug: string; image: string;
 }
+
+export interface BagLine extends Sneaker { id: number; size: string | null }
+export interface OrderItem { name: string; image: string; seller: string; condition: string; size: string | null; price: number }
+export interface OrderData {
+  code: string; status: string; stage: number; total: number; subtotal: number; shipping: number; fee: number;
+  shippingMethod: string; paymentMethod: string; address: Record<string, string>; placedAt: string; items: OrderItem[];
+}

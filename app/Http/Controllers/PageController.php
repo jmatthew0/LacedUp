@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Data\Catalog;
+
 use App\Models\Seller;
 use App\Models\Sneaker;
 use Illuminate\Http\Request;

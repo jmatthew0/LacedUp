@@ -1,0 +1,16 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class BagItem extends Model
+{
+    protected $fillable = ['user_id', 'sneaker_id', 'size'];
+
+    public function sneaker(): BelongsTo
+    {
+        return $this->belongsTo(Sneaker::class);
+    }
+}
