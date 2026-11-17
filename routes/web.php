@@ -8,6 +8,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ListingController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -39,4 +41,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/sell', [PageController::class, 'sell']);
     Route::get('/dashboard', [PageController::class, 'dashboard']);
+
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::post('/listings', [ListingController::class, 'store']);
+    Route::delete('/listings/{sneaker:slug}', [ListingController::class, 'destroy']);
+
 });
