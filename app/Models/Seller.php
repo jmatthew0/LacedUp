@@ -16,6 +16,11 @@ class Seller extends Model
         return $this->hasMany(Sneaker::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function toCard(): array
     {
         return [

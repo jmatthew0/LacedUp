@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
-    protected $fillable = ['user_id', 'code', 'stage', 'subtotal', 'shipping', 'fee', 'total', 'shipping_method', 'payment_method', 'address'];
+    protected $fillable = ['user_id', 'code', 'stage', 'subtotal', 'shipping', 'fee', 'total', 'shipping_method', 'payment_method', 'address', 'confirmed_at'];
 
-    protected $casts = ['address' => 'array'];
+    protected $casts = ['address' => 'array', 'confirmed_at' => 'datetime'];
 
     public function items(): HasMany
     {
@@ -25,7 +25,7 @@ class Order extends Model
         };
     }
 
-    /** Load `items` before calling this. */
+    /** Load `items.review` before calling this. */
     public function toCard(): array
     {
         return [
@@ -33,7 +33,9 @@ class Order extends Model
             'subtotal' => $this->subtotal, 'shipping' => $this->shipping, 'fee' => $this->fee, 'total' => $this->total,
             'shippingMethod' => $this->shipping_method, 'paymentMethod' => $this->payment_method,
             'address' => $this->address, 'placedAt' => $this->created_at->format('M j, g:i A'),
-            'items' => $this->items->map(fn ($i) => $i->only('name', 'image', 'seller', 'condition', 'size', 'price'))->values(),
+            'confirmed' => (bool) $this->confirmed_at,
+            'items' => $this->items->map(fn ($i) => $i->only('id', 'name', 'image', 'seller', 'condition', 'size', 'price')
+                + ['review' => $i->review?->only('rating', 'comment')])->values(),
         ];
     }
 }
