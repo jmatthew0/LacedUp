@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Offer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +17,7 @@ class DashboardController extends Controller
         $seller = $request->user()->seller;
 
         if (! $seller) {
-            return Inertia::render('Dashboard', ['seller' => null, 'stats' => null, 'listings' => [], 'toShip' => []]);
+            return Inertia::render('Dashboard', ['seller' => null, 'stats' => null, 'listings' => [], 'toShip' => [], 'offers' => []]);
         }
 
         $listings = $seller->sneakers()->latest()->get();
@@ -36,6 +37,13 @@ class DashboardController extends Controller
             ])->values(),
             'toShip' => (clone $sales)->whereHas('order', fn ($q) => $q->where('stage', '<', 2))->with('order')->get()
                 ->map(fn ($i) => ['name' => $i->name, 'size' => $i->size, 'code' => $i->order->code])->values(),
+            'offers' => Offer::where('status', 'pending')
+                ->whereHas('sneaker', fn ($q) => $q->where('seller_id', $seller->id)->whereNull('sold_at'))
+                ->with(['sneaker', 'buyer'])->latest()->get()
+                ->map(fn ($o) => [
+                    'id' => $o->id, 'name' => $o->sneaker->name, 'size' => $o->size,
+                    'asking' => $o->sneaker->price, 'amount' => $o->amount, 'buyer' => $o->buyer->name,
+                ])->values(),
         ]);
     }
 

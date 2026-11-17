@@ -1,16 +1,50 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { peso } from '@/lib/format';
 
 interface Row { slug: string; name: string; image: string; sizes: number[]; price: number; status: string }
+interface Offer { id: number; name: string; size: string | null; asking: number; amount: number; buyer: string }
 interface Props {
   seller: { handle: string; name: string } | null;
   stats: { earnings: number; active: number; sales: number; rating: number } | null;
   listings: Row[];
   toShip: { name: string; size: string | null; code: string }[];
+  offers: Offer[];
 }
 
-export default function Dashboard({ seller, stats, listings, toShip }: Props) {
+function OfferRow({ o }: { o: Offer }) {
+  const [counter, setCounter] = useState(false);
+  const [value, setValue] = useState(0);
+  const [error, setError] = useState('');
+  const send = (data: Record<string, string | number>) => router.post(`/offers/${o.id}/respond`, data, {
+    preserveScroll: true,
+    onError: (e) => setError(e.counter_amount ?? ''),
+  });
+
+  return (
+    <div className="border-t border-stone py-3 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span>{o.name}{o.size ? ` · US ${o.size}` : ''}<span className="ml-2 text-xs text-black/60">from {o.buyer} · asking {peso(o.asking)}</span></span>
+        <span className="flex items-center gap-2">
+          <b>{peso(o.amount)}</b>
+          <button onClick={() => send({ action: 'accept' })} className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white">Accept</button>
+          <button onClick={() => setCounter(!counter)} className="rounded-full border border-ink/30 px-3 py-1 text-xs">Counter</button>
+          <button onClick={() => send({ action: 'decline' })} className="rounded-full border border-ink/30 px-3 py-1 text-xs">Decline</button>
+        </span>
+      </div>
+      {counter && (
+        <div className="mt-2 flex items-center justify-end gap-2">
+          <input type="number" placeholder="Counter price" value={value || ''} onChange={(e) => setValue(+e.target.value)} className="w-36 rounded-full bg-paper px-4 py-1.5 text-xs" />
+          <button disabled={!value} onClick={() => send({ action: 'counter', counter_amount: value })} className="rounded-full bg-ember px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-40">Send counter</button>
+        </div>
+      )}
+      {error && <p className="mt-1 text-right text-xs text-ember">{error}</p>}
+    </div>
+  );
+}
+
+export default function Dashboard({ seller, stats, listings, toShip, offers }: Props) {
   if (!seller || !stats) {
     return (
       <AppLayout>
@@ -24,7 +58,7 @@ export default function Dashboard({ seller, stats, listings, toShip }: Props) {
     );
   }
 
-  const cards = [['Earnings this month', peso(stats.earnings)], ['Active listings', String(stats.active)], ['Pairs sold', String(stats.sales)], ['Rating', `${stats.rating} ★`]];
+  const cards = [['Earnings this month', peso(stats.earnings)], ['Active listings', String(stats.active)], ['Pending offers', String(offers.length)], ['Pairs sold', String(stats.sales)], ['Rating', `${stats.rating} ★`]];
 
   return (
     <AppLayout>
@@ -37,11 +71,16 @@ export default function Dashboard({ seller, stats, listings, toShip }: Props) {
         </div>
       </div>
 
-      <div className="my-6 grid gap-3 sm:grid-cols-4">
+      <div className="my-6 grid gap-3 sm:grid-cols-5">
         {cards.map(([l, v]) => <div key={l} className="rounded-2xl bg-white p-4"><p className="text-[10px] text-black/50">{l}</p><p className="display text-xl">{v}</p></div>)}
       </div>
 
       <section className="rounded-2xl bg-white p-5">
+        <h2 className="display mb-3 text-base">Pending offers</h2>
+        {offers.length ? offers.map((o) => <OfferRow key={o.id} o={o} />) : <p className="border-t border-stone pt-3 text-sm text-black/60">No offers waiting.</p>}
+      </section>
+
+      <section className="mt-6 rounded-2xl bg-white p-5">
         <h2 className="display mb-3 text-base">Orders to ship</h2>
         {toShip.length ? toShip.map((o) => (
           <div key={o.code + o.name} className="flex items-center justify-between border-t border-stone py-3 text-sm">

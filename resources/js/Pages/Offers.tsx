@@ -10,7 +10,7 @@ interface Offer {
 const label: Record<string, string> = { pending: 'Waiting for seller', countered: 'Seller countered', accepted: 'Accepted', declined: 'Declined' };
 
 export default function Offers({ offers }: { offers: Offer[] }) {
-  const post = (url: string, data: object = {}) => router.post(url, data, { preserveScroll: true });
+    const post = (url: string, data: Record<string, string> = {}) => router.post(url, data, { preserveScroll: true });
   return (
     <AppLayout>
       <Head title="My offers" />
