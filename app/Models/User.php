@@ -53,4 +53,9 @@ public function savedSneakers(): BelongsToMany
     return $this->belongsToMany(Sneaker::class, 'saved_sneakers')->withTimestamps();
 }
 
+public function offers(): HasMany
+{
+    return $this->hasMany(Offer::class);
+}
+
 }

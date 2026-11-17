@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BagItem extends Model
 {
-    protected $fillable = ['user_id', 'sneaker_id', 'size'];
+    protected $fillable = ['user_id', 'sneaker_id', 'size', 'price'];
 
     public function sneaker(): BelongsTo
     {
