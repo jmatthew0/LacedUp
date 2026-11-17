@@ -23,8 +23,9 @@ export default function AppLayout({ children }: PropsWithChildren) {
         <Link href="/bag" className="text-xs hover:text-ember">Bag</Link>
         {auth.user ? (
           <>
-            <Link href="/orders" className="text-xs hover:text-ember">Orders</Link>
-            <Link href="/dashboard" className="text-xs hover:text-ember">{auth.user.name}</Link>
+            <Link href="/orders" className="text-xs hover:text-ember">My orders</Link>
+            <Link href="/dashboard" className="text-xs hover:text-ember">Seller dashboard</Link>
+            <span className="hidden text-xs text-black/50 lg:inline">{auth.user.name}</span>
             <button onClick={() => router.post('/sign-out')} className="text-xs hover:text-ember">Sign out</button>
           </>
         ) : (
