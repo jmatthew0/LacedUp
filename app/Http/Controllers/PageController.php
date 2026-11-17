@@ -10,7 +10,7 @@ use Inertia\Response;
 
 class PageController extends Controller
 {
-    private function all() { return Sneaker::with('seller')->get()->map->toCard(); }
+    private function all() { return Sneaker::available()->with('seller')->get()->map->toCard(); }
 
     public function search(Request $r): Response
     {
@@ -26,13 +26,17 @@ class PageController extends Controller
 
         return Inertia::render('SellerProfile', [
             'seller' => $seller->toCard(),
-            'listings' => $seller->sneakers()->with('seller')->get()->map->toCard(),
+            'listings' => $seller->sneakers()->available()->with('seller')->get()->map->toCard(),
         ]);
     }
 
-    public function sell(): Response { return Inertia::render('Sell', ['models' => $this->all()]); }
+    /** Models a seller can pick from: the starter catalog (sellers without a user account). */
+    public function sell(): Response
+    {
+        $models = Sneaker::with('seller')->whereHas('seller', fn ($q) => $q->whereNull('user_id'))->get()->map->toCard();
 
-    public function dashboard(): Response { return Inertia::render('Dashboard', ['listings' => $this->all()->take(5)->values()]); }
+        return Inertia::render('Sell', ['models' => $models]);
+    }
 
     public function signIn(): Response { return Inertia::render('SignIn'); }
 }

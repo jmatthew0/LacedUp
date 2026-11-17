@@ -12,11 +12,11 @@ class MarketplaceController extends Controller
     public function index(): Response
     {
         return Inertia::render('Marketplace', [
-            'hero' => Sneaker::where('featured', true)->orderBy('price')->get()->map(fn ($s) => [
+            'hero' => Sneaker::available()->where('featured', true)->orderBy('price')->get()->map(fn ($s) => [
                 'badge' => $s->condition, 'title' => $s->name, 'blurb' => $s->blurb,
                 'price' => $s->price, 'slug' => $s->slug, 'image' => $s->image,
             ]),
-            'sneakers' => Sneaker::with('seller')->orderBy('price')->get()->map->toCard(),
+            'sneakers' => Sneaker::available()->with('seller')->orderBy('price')->get()->map->toCard(),
             'sellers' => Seller::orderByDesc('sales')->take(6)->get()->map->toCard(),
         ]);
     }
