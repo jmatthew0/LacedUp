@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Notifications\AppNotification;
 
 class OrderController extends Controller
 {
@@ -68,6 +69,8 @@ class OrderController extends Controller
         ]);
 
         $seller->update(['rating' => round(Review::where('seller_id', $seller->id)->avg('rating'), 1)]);
+
+        $seller->user?->notify(new AppNotification("{$request->user()->name} left you a {$data['rating']}-star review", "/sellers/{$seller->handle}"));
 
         return back();
     }

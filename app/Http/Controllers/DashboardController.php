@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Notifications\AppNotification;
 
 class DashboardController extends Controller
 {
@@ -56,9 +57,10 @@ class DashboardController extends Controller
             ->whereHas('items', fn ($q) => $q->where('seller', $seller->handle))
             ->firstOrFail();
 
-        if ($order->stage < 2) {
-            $order->update(['stage' => 2]);
-        }
+            if ($order->stage < 2) {
+                $order->update(['stage' => 2]);
+                $order->user->notify(new AppNotification("Order {$order->code} has shipped", "/orders/{$order->code}"));
+            }
 
         return back();
     }

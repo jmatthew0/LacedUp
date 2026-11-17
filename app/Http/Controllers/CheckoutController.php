@@ -12,6 +12,8 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
+use App\Models\Seller;
+use App\Notifications\AppNotification;
 
 class CheckoutController extends Controller
 {
@@ -85,7 +87,10 @@ class CheckoutController extends Controller
             // The bag page clears out any pair that is no longer available.
             return redirect('/bag');
         }
-
+        $order->load('items');
+Seller::whereIn('handle', $order->items->pluck('seller')->unique())->with('user')->get()
+    ->each(fn ($s) => $s->user?->notify(new AppNotification("New order {$order->code}. Ship it from your dashboard.", '/dashboard')));
+    
         return redirect('/orders/'.$order->code);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Offer;
 use App\Models\Sneaker;
+use App\Notifications\AppNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -38,7 +39,7 @@ class OfferController extends Controller
             'amount' => ['required', 'integer', 'min:1'],
         ]);
 
-        $sneaker = Sneaker::available()->with('seller')->where('slug', $data['slug'])->firstOrFail();
+        $sneaker = Sneaker::available()->with('seller.user')->where('slug', $data['slug'])->firstOrFail();
         $user = $request->user();
 
         if ($sneaker->seller->user_id === $user->id) {
@@ -56,13 +57,18 @@ class OfferController extends Controller
 
         $user->offers()->create(['sneaker_id' => $sneaker->id, 'size' => $data['size'], 'amount' => $data['amount']]);
 
+        $sneaker->seller->user?->notify(new AppNotification(
+            "New offer of ₱".number_format($data['amount'])." on {$sneaker->name} from {$user->name}",
+            '/dashboard',
+        ));
+
         return redirect('/offers');
     }
 
     /** Seller: accept, counter, or decline. */
     public function respond(Request $request, Offer $offer): RedirectResponse
     {
-        $offer->load('sneaker.seller');
+        $offer->load('sneaker.seller', 'buyer');
         abort_unless($offer->sneaker->seller->user_id === $request->user()->id, 403);
         abort_unless($offer->status === 'pending' && ! $offer->sneaker->sold_at, 422);
 
@@ -71,16 +77,21 @@ class OfferController extends Controller
             'counter_amount' => ['required_if:action,counter', 'nullable', 'integer', 'min:1'],
         ]);
 
+        $name = $offer->sneaker->name;
+
         if ($data['action'] === 'accept') {
             $offer->update(['status' => 'accepted', 'final_amount' => $offer->amount]);
+            $offer->buyer->notify(new AppNotification("Your offer on {$name} was accepted. Buy it at ₱".number_format($offer->amount), '/offers'));
         } elseif ($data['action'] === 'decline') {
             $offer->update(['status' => 'declined']);
+            $offer->buyer->notify(new AppNotification("Your offer on {$name} was declined", '/offers'));
         } else {
             $counter = (int) $data['counter_amount'];
             if ($counter <= $offer->amount || $counter >= $offer->sneaker->price) {
                 throw ValidationException::withMessages(['counter_amount' => 'Counter must be above the offer and below the asking price.']);
             }
             $offer->update(['status' => 'countered', 'counter_amount' => $counter]);
+            $offer->buyer->notify(new AppNotification("The seller countered your offer on {$name} with ₱".number_format($counter), '/offers'));
         }
 
         return back();
@@ -96,6 +107,12 @@ class OfferController extends Controller
         $offer->update($action === 'accept'
             ? ['status' => 'accepted', 'final_amount' => $offer->counter_amount]
             : ['status' => 'declined']);
+
+        $offer->load('sneaker.seller.user');
+        $offer->sneaker->seller->user?->notify(new AppNotification(
+            $request->user()->name.($action === 'accept' ? ' accepted' : ' declined')." your counter on {$offer->sneaker->name}",
+            '/dashboard',
+        ));
 
         return back();
     }
