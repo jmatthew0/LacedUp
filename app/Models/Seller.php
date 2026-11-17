@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Seller extends Model
 {
-    protected $fillable = ['handle', 'name', 'bio', 'sales', 'rating', 'on_time'];
+    protected $fillable = ['user_id', 'handle', 'name', 'bio', 'sales', 'rating', 'on_time'];
 
     protected $casts = ['rating' => 'float'];
 

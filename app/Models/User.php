@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -30,7 +31,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    
+
     public function bagItems(): HasMany
 {
     return $this->hasMany(BagItem::class);
@@ -40,4 +41,10 @@ public function orders(): HasMany
 {
     return $this->hasMany(Order::class);
 }
+
+public function seller(): HasOne
+{
+    return $this->hasOne(Seller::class);
+}
+
 }
