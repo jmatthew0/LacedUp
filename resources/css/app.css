@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --color-paper: #f2f0ea;
+  --color-ink: #121212;
+  --color-ember: #f0603a;
+  --color-stone: #d9d8d2;
+  --font-display: 'Archivo', sans-serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); }
+.display { font-family: var(--font-display); font-stretch: 125%; font-weight: 900; text-transform: uppercase; line-height: .95; letter-spacing: -.01em; }
+.no-scrollbar { scrollbar-width: none; } .no-scrollbar::-webkit-scrollbar { display: none; }
+:focus-visible { outline: 2px solid var(--color-ember); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
