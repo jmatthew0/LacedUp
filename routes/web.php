@@ -40,7 +40,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{code}/advance', [OrderController::class, 'advance']);
 
     Route::get('/sell', [PageController::class, 'sell']);
-    Route::get('/dashboard', [PageController::class, 'dashboard']);
     Route::post('/dashboard/orders/{code}/ship', [DashboardController::class, 'ship']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
