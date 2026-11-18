@@ -27,6 +27,7 @@ class Seller extends Model
         return [
             'handle' => $this->handle, 'name' => $this->name, 'bio' => $this->bio, 'avatar' => $this->avatar,
             'sales' => $this->sales, 'rating' => $this->rating, 'onTime' => $this->on_time,
+            'canMessage' => (bool) $this->user_id,
         ];
     }
 

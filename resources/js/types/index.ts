@@ -1,9 +1,11 @@
 export interface Sneaker {
   slug: string; name: string; category: string; seller: string; rating: number;
   price: number; condition: string; sizes: number[]; image: string;
+  canMessage?: boolean;
 }
 export interface Seller { avatar?: string | null;
   handle: string; name: string; bio: string; sales: number; rating: number; onTime: number;
+  canMessage?: boolean;
 }
 
 export interface HeroSlide {

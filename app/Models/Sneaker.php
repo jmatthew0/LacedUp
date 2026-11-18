@@ -30,6 +30,7 @@ class Sneaker extends Model
             'seller' => $this->seller->handle, 'rating' => $this->seller->rating,
             'price' => $this->price, 'condition' => $this->condition,
             'sizes' => $this->sizes, 'image' => $this->image,
+            'canMessage' => (bool) $this->seller->user_id,
         ];
     }
 }
