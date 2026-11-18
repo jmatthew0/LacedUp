@@ -15,7 +15,9 @@ export default function SignIn() {
   return (
     <div className="grid min-h-screen md:grid-cols-2">
       <Head title="Sign in" />
-      <div className="hidden flex-col justify-between bg-ink p-10 text-white md:flex">
+      <div className="relative isolate hidden flex-col justify-between overflow-hidden bg-ink p-10 text-white md:flex">
+      <img src="/images/videoframe.png" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/35 to-black/55" />
         <Link href="/" className="display text-lg">Laced<span className="text-ember">Up</span></Link>
         <div>
           <h1 className="display text-6xl">Discover. Buy. Sell.</h1>
