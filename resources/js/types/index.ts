@@ -21,6 +21,6 @@ export interface OrderData {
   code: string; status: string; stage: number; total: number; subtotal: number; shipping: number; fee: number;
   shippingMethod: string; paymentMethod: string; address: Record<string, string>; placedAt: string;
   confirmed: boolean; items: OrderItem[];
-  canDispute: boolean; canReturn: boolean; disputes: DisputeData[];
+  canDispute: boolean; canReturn: boolean; disputeNote: string | null; returnNote: string | null; disputes: DisputeData[];
 }
 export interface DisputeData { id: number; type: 'dispute' | 'return'; status: 'open' | 'approved' | 'declined'; reason: string; response: string | null; date: string }

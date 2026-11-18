@@ -116,7 +116,9 @@ export default function Tracking({ order }: { order: OrderData }) {
   <button disabled={!order.canDispute} onClick={() => setCaseType('dispute')} className="flex-1 rounded-full border border-ink/40 py-2 disabled:opacity-30">Open dispute</button>
   <button disabled={!order.canReturn} onClick={() => setCaseType('return')} className="flex-1 rounded-full border border-ink/40 py-2 disabled:opacity-30">Request return</button>
 </div>
-<p className="text-black/50">Disputes open once your order ships. Returns are available for 3 days after delivery.</p>
+{(order.disputeNote || order.returnNote) && (
+  <p className="text-black/50">{[order.disputeNote, order.returnNote].filter(Boolean).join(' ')}</p>
+)}
         </aside>
       </div>
       <ConfirmModal open={confirming} title="Confirm delivery?" confirmLabel="Yes, it arrived"
