@@ -41,7 +41,7 @@ export default function ProductDetail({ sneaker, similar }: { sneaker: Sneaker; 
             <HeartButton slug={sneaker.slug} className="!h-12 !w-12 border border-ink/40" />
           </div>
 
-          <OfferBox slug={sneaker.slug} price={sneaker.price} size={size} />
+          <OfferBox sneaker={sneaker} size={size} />
 
           {sneaker.canMessage && (
             <button onClick={() => router.post('/messages/start', { seller: sneaker.seller, slug: sneaker.slug })} className="mt-4 block text-sm underline">
