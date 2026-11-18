@@ -34,6 +34,7 @@ function UserMenu({ user }: { user: User }) {
             <p className="truncate text-xs text-black/50">{user.email}</p>
           </div>
           <div className="pt-1">
+          <Link href="/messages" className={item}>Messages</Link>
             <Link href="/orders" className={item}>My orders</Link>
             <Link href="/saved" className={item}>Saved pairs</Link>
             <Link href="/offers" className={item}>My offers</Link>
