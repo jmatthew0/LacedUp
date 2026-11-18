@@ -9,6 +9,7 @@ const links = [
   ['saved', '/saved', 'Saved pairs'],
   ['orders', '/orders', 'My orders'],
   ['offers', '/offers', 'My offers'],
+  ['addresses', '/addresses', 'Addresses'],
   ['settings', '/settings', 'Account settings'],
 ] as const;
 

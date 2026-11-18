@@ -24,3 +24,7 @@ export interface OrderData {
   canDispute: boolean; canReturn: boolean; disputeNote: string | null; returnNote: string | null; disputes: DisputeData[];
 }
 export interface DisputeData { id: number; type: 'dispute' | 'return'; status: 'open' | 'approved' | 'declined'; reason: string; response: string | null; date: string }
+
+export interface AddressData {
+  id: number; label: string; name: string; phone: string; address: string; city: string; postal: string; isDefault: boolean;
+}
