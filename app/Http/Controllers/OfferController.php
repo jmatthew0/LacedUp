@@ -25,6 +25,7 @@ class OfferController extends Controller
             'sneaker' => [
                 'slug' => $o->sneaker->slug, 'name' => $o->sneaker->name, 'image' => $o->sneaker->image,
                 'price' => $o->sneaker->price, 'seller' => $o->sneaker->seller->handle,
+                'condition' => $o->sneaker->condition,
             ],
         ]);
 
@@ -140,4 +141,33 @@ class OfferController extends Controller
 
         return redirect('/checkout');
     }
+
+    /** Buyer: raise a pending offer. */
+public function raise(Request $request, Offer $offer): RedirectResponse
+{
+    abort_unless($offer->user_id === $request->user()->id && $offer->status === 'pending', 403);
+
+    $offer->load('sneaker.seller.user');
+    $amount = (int) $request->validate(['amount' => ['required', 'integer']])['amount'];
+
+    if ($amount <= $offer->amount || $amount >= $offer->sneaker->price) {
+        throw ValidationException::withMessages(['amount' => 'New offer must be above your current offer and below the asking price.']);
+    }
+
+    $offer->update(['amount' => $amount]);
+    $offer->sneaker->seller->user?->notify(new AppNotification(
+        "{$request->user()->name} raised their offer on {$offer->sneaker->name} to ₱".number_format($amount), '/dashboard',
+    ));
+
+    return back();
+}
+
+/** Buyer: cancel a pending offer or dismiss a declined one. */
+public function destroy(Request $request, Offer $offer): RedirectResponse
+{
+    abort_unless($offer->user_id === $request->user()->id && in_array($offer->status, ['pending', 'declined'], true), 403);
+    $offer->delete();
+
+    return back();
+}
 }

@@ -76,4 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/messages/{conversation}', [MessageController::class, 'send']);
 
     Route::post('/bag/bulk', [BagController::class, 'bulk']);
+
+    Route::patch('/offers/{offer}/raise', [OfferController::class, 'raise']);
+    Route::delete('/offers/{offer}', [OfferController::class, 'destroy']);
 });
