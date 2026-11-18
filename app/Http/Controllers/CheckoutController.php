@@ -31,6 +31,7 @@ class CheckoutController extends Controller
         return Inertia::render('Checkout', [
             'items' => $bag->map(fn ($b) => ['id' => $b->id, 'size' => $b->size, 'price' => $b->price ?? $b->sneaker->price] + $b->sneaker->toCard())->values(),
             'fee' => self::FEE,
+            'addresses' => $request->user()->addresses()->orderByDesc('is_default')->orderBy('id')->get()->map->toCard(),
         ]);
     }
 
@@ -44,6 +45,7 @@ class CheckoutController extends Controller
             'postal' => ['required', 'string', 'max:10'],
             'shipping' => ['required', Rule::in(array_keys(self::SHIPPING))],
             'payment' => ['required', Rule::in(self::PAYMENTS)],
+            'save_address' => ['boolean'],
         ]);
 
         $bag = $request->user()->bagItems()->with('sneaker.seller')->get();
@@ -91,6 +93,13 @@ class CheckoutController extends Controller
 Seller::whereIn('handle', $order->items->pluck('seller')->unique())->with('user')->get()
     ->each(fn ($s) => $s->user?->notify(new AppNotification("New order {$order->code}. Ship it from your dashboard.", '/dashboard')));
     
+    if ($request->boolean('save_address')) {
+        $user = $request->user();
+        $user->addresses()->firstOrCreate(
+            $request->only('name', 'phone', 'address', 'city', 'postal'),
+            ['label' => 'Home', 'is_default' => ! $user->addresses()->exists()],
+        );
+    }
         return redirect('/orders/'.$order->code);
     }
 }
