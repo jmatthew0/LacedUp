@@ -46,4 +46,22 @@ class BagController extends Controller
 
         return back();
     }
+
+    public function bulk(Request $request): RedirectResponse
+{
+    $data = $request->validate([
+        'items' => ['required', 'array', 'min:1'],
+        'items.*.slug' => ['required', 'exists:sneakers,slug'],
+        'items.*.size' => ['nullable', 'string', 'max:8'],
+    ]);
+
+    foreach ($data['items'] as $i) {
+        $sneaker = Sneaker::available()->where('slug', $i['slug'])->first();
+        if ($sneaker) {
+            $request->user()->bagItems()->updateOrCreate(['sneaker_id' => $sneaker->id], ['size' => $i['size'] ?? null, 'price' => null]);
+        }
+    }
+
+    return redirect('/bag');
+}
 }

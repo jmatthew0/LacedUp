@@ -74,4 +74,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/messages/{conversation?}', [MessageController::class, 'index']);
     Route::post('/messages/start', [MessageController::class, 'start']);
     Route::post('/messages/{conversation}', [MessageController::class, 'send']);
+
+    Route::post('/bag/bulk', [BagController::class, 'bulk']);
 });
