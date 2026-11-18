@@ -16,6 +16,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\DisputeController;
+use App\Http\Controllers\AddressController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -84,4 +85,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/orders/{code}/disputes', [DisputeController::class, 'store']);
     Route::post('/disputes/{dispute}/respond', [DisputeController::class, 'respond']);
+
+    Route::get('/addresses', [AddressController::class, 'index']);
+    Route::post('/addresses', [AddressController::class, 'store']);
+    Route::put('/addresses/{address}', [AddressController::class, 'update']);
+    Route::post('/addresses/{address}/default', [AddressController::class, 'makeDefault']);
+    Route::delete('/addresses/{address}', [AddressController::class, 'destroy']);
 });
