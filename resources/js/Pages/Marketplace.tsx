@@ -2,11 +2,12 @@ import { Head } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import Carousel from '@/Components/Carousel';
 import FilterBar from '@/Components/FilterBar';
-import HeroSlide from '@/Components/HeroSlide';
+import HeroSlide, { heroThemes } from '@/Components/HeroSlide';
 import SellerCard from '@/Components/SellerCard';
 import SneakerCard from '@/Components/SneakerCard';
 import AppLayout from '@/Layouts/AppLayout';
 import { HeroSlide as Hero, Seller, Sneaker } from '@/types';
+
 
 interface Props { hero: Hero[]; sneakers: Sneaker[]; sellers: Seller[]; }
 
@@ -22,12 +23,14 @@ export default function Marketplace({ hero, sneakers, sellers }: Props) {
     [sneakers, size, maxPrice, deadstock],
   );
 
+  const themes = useMemo(() => heroThemes(hero.map((h) => h.title)), [hero]);
+
   return (
     <AppLayout>
       <Head title="Marketplace" />
 
       <Carousel label="Featured drops" autoplayMs={6000} dots overlay>
-        {hero.map((s, i) => <HeroSlide key={s.slug} s={s} index={i} />)}
+      {hero.map((s, i) => <HeroSlide key={s.slug} s={s} theme={themes[i]} />)}
       </Carousel>
 
       <ul className="my-8 grid grid-cols-2 gap-4 border-y border-stone py-4 text-xs sm:grid-cols-4">
