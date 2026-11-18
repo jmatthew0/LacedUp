@@ -4,6 +4,7 @@ import ConfirmModal from '@/Components/ConfirmModal';
 import AppLayout from '@/Layouts/AppLayout';
 import { peso } from '@/lib/format';
 import { OrderData, OrderItem } from '@/types';
+import CaseModal from '@/Components/CaseModal';
 
 const stages = [
   ['Order placed', 'Your order was received'],
@@ -49,6 +50,7 @@ export default function Tracking({ order }: { order: OrderData }) {
   const at = order.stage;
   const a = order.address;
   const [confirming, setConfirming] = useState(false);
+  const [caseType, setCaseType] = useState<'dispute' | 'return' | null>(null);
 
   return (
     <AppLayout>
@@ -98,16 +100,30 @@ export default function Tracking({ order }: { order: OrderData }) {
 
           {order.confirmed && order.items.map((i) => <ReviewBox key={i.id} code={order.code} item={i} />)}
 
-          <div className="flex gap-2">
-            <button className="flex-1 rounded-full border border-ink/40 py-2">Open dispute</button>
-            <button className="flex-1 rounded-full border border-ink/40 py-2">Request return</button>
-          </div>
+          {order.disputes.map((d) => (
+  <div key={d.id} className="rounded-lg bg-paper p-3">
+    <p className="flex justify-between gap-2">
+      <b>{d.type === 'dispute' ? 'Dispute' : 'Return request'} · {d.reason}</b>
+      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${d.status === 'open' ? 'bg-ink text-white' : d.status === 'approved' ? 'bg-green-600 text-white' : 'border border-ink'}`}>
+        {d.status === 'open' ? 'Waiting for seller' : d.status === 'approved' ? 'Approved' : 'Declined'}
+      </span>
+    </p>
+    <p className="text-black/50">Sent {d.date}</p>
+    {d.response && <p className="mt-1">Seller: “{d.response}”</p>}
+  </div>
+))}
+<div className="flex gap-2">
+  <button disabled={!order.canDispute} onClick={() => setCaseType('dispute')} className="flex-1 rounded-full border border-ink/40 py-2 disabled:opacity-30">Open dispute</button>
+  <button disabled={!order.canReturn} onClick={() => setCaseType('return')} className="flex-1 rounded-full border border-ink/40 py-2 disabled:opacity-30">Request return</button>
+</div>
+<p className="text-black/50">Disputes open once your order ships. Returns are available for 3 days after delivery.</p>
         </aside>
       </div>
       <ConfirmModal open={confirming} title="Confirm delivery?" confirmLabel="Yes, it arrived"
         message="Confirming tells us the pair arrived as described and releases the payment to the seller. You can't undo this."
         onClose={() => setConfirming(false)}
         onConfirm={() => router.post(`/orders/${order.code}/confirm`, {}, { preserveScroll: true, onSuccess: () => setConfirming(false) })} />
+        <CaseModal code={order.code} type={caseType} onClose={() => setCaseType(null)} />
     </AppLayout>
   );
 }
