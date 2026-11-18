@@ -26,8 +26,8 @@ export default function Marketplace({ hero, sneakers, sellers }: Props) {
     <AppLayout>
       <Head title="Marketplace" />
 
-      <Carousel label="Featured drops" autoplayMs={6000} dots>
-        {hero.map((s) => <HeroSlide key={s.slug} s={s} />)}
+      <Carousel label="Featured drops" autoplayMs={6000} dots overlay>
+        {hero.map((s, i) => <HeroSlide key={s.slug} s={s} index={i} />)}
       </Carousel>
 
       <ul className="my-8 grid grid-cols-2 gap-4 border-y border-stone py-4 text-xs sm:grid-cols-4">
