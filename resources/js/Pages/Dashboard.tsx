@@ -1,5 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import ConfirmModal from '@/Components/ConfirmModal';
+import Modal from '@/Components/Modal';
 import AppLayout from '@/Layouts/AppLayout';
 import { peso } from '@/lib/format';
 
@@ -17,34 +19,48 @@ function OfferRow({ o }: { o: Offer }) {
   const [counter, setCounter] = useState(false);
   const [value, setValue] = useState(0);
   const [error, setError] = useState('');
-  const send = (data: Record<string, string | number>) => router.post(`/offers/${o.id}/respond`, data, {
+  const [busy, setBusy] = useState(false);
+
+  const send = (data: Record<string, string | number>, done?: () => void) => router.post(`/offers/${o.id}/respond`, data, {
     preserveScroll: true,
-    onError: (e) => setError(e.counter_amount ?? ''),
+    onStart: () => { setBusy(true); setError(''); },
+    onFinish: () => setBusy(false),
+    onError: (e) => setError(e.counter_amount ?? 'Something went wrong.'),
+    onSuccess: done,
   });
 
   return (
-    <div className="border-t border-stone py-3 text-sm">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span>{o.name}{o.size ? ` · US ${o.size}` : ''}<span className="ml-2 text-xs text-black/60">from {o.buyer} · asking {peso(o.asking)}</span></span>
-        <span className="flex items-center gap-2">
-          <b>{peso(o.amount)}</b>
-          <button onClick={() => send({ action: 'accept' })} className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white">Accept</button>
-          <button onClick={() => setCounter(!counter)} className="rounded-full border border-ink/30 px-3 py-1 text-xs">Counter</button>
-          <button onClick={() => send({ action: 'decline' })} className="rounded-full border border-ink/30 px-3 py-1 text-xs">Decline</button>
-        </span>
-      </div>
-      {counter && (
-        <div className="mt-2 flex items-center justify-end gap-2">
-          <input type="number" placeholder="Counter price" value={value || ''} onChange={(e) => setValue(+e.target.value)} className="w-36 rounded-full bg-paper px-4 py-1.5 text-xs" />
-          <button disabled={!value} onClick={() => send({ action: 'counter', counter_amount: value })} className="rounded-full bg-ember px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-40">Send counter</button>
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-stone py-3 text-sm">
+      <span>{o.name}{o.size ? ` · US ${o.size}` : ''}<span className="ml-2 text-xs text-black/60">from {o.buyer} · asking {peso(o.asking)}</span></span>
+      <span className="flex items-center gap-2">
+        <b>{peso(o.amount)}</b>
+        <button onClick={() => send({ action: 'accept' })} className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white">Accept</button>
+        <button onClick={() => setCounter(true)} className="rounded-full border border-ink/30 px-3 py-1 text-xs">Counter</button>
+        <button onClick={() => send({ action: 'decline' })} className="rounded-full border border-ink/30 px-3 py-1 text-xs">Decline</button>
+      </span>
+
+      <Modal open={counter} onClose={() => { setCounter(false); setError(''); }} title="Counter offer">
+        <p className="text-sm text-black/70">{o.buyer} offered <b>{peso(o.amount)}</b> on {o.name}. Asking price is {peso(o.asking)}.</p>
+        <label className="mt-4 block text-xs font-semibold">Your counter (₱)
+          <input type="number" autoFocus value={value || ''} onChange={(e) => setValue(+e.target.value)} className="mt-1 w-full rounded-full bg-paper px-4 py-3 text-sm font-normal" />
+        </label>
+        <p className="mt-1 px-2 text-[11px] text-black/50">Must be above {peso(o.amount)} and below {peso(o.asking)}</p>
+        {error && <p className="mt-3 text-xs text-ember">{error}</p>}
+        <div className="mt-6 flex justify-end gap-2">
+          <button onClick={() => setCounter(false)} className="rounded-full border border-ink/40 px-5 py-2.5 text-sm">Cancel</button>
+          <button disabled={!value || busy} onClick={() => send({ action: 'counter', counter_amount: value }, () => setCounter(false))} className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-40">
+            {busy ? 'Sending' : 'Send counter'}
+          </button>
         </div>
-      )}
-      {error && <p className="mt-1 text-right text-xs text-ember">{error}</p>}
+      </Modal>
     </div>
   );
 }
 
 export default function Dashboard({ seller, stats, listings, toShip, offers }: Props) {
+  const [del, setDel] = useState<Row | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   if (!seller || !stats) {
     return (
       <AppLayout>
@@ -101,17 +117,23 @@ export default function Dashboard({ seller, stats, listings, toShip, offers }: P
                   <td className="flex items-center gap-3 py-3 font-semibold"><img src={s.image} alt="" className="h-10 w-10 rounded-lg bg-stone object-contain" />{s.name}</td>
                   <td>{s.sizes.join(' · ')}</td><td>{peso(s.price)}</td>
                   <td><span className={`rounded-full px-2.5 py-0.5 ${s.status === 'Sold' ? 'bg-paper' : 'bg-ink text-white'}`}>{s.status}</span></td>
-                  <td className="text-right">
-                    {s.status === 'Active' && (
-                      <button onClick={() => confirm(`Delete ${s.name}?`) && router.delete(`/listings/${s.slug}`, { preserveScroll: true })} className="underline">Delete</button>
-                    )}
-                  </td>
+                  <td className="text-right">{s.status === 'Active' && <button onClick={() => setDel(s)} className="underline">Delete</button>}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : <p className="text-sm text-black/60">No listings yet.</p>}
       </section>
+
+      <ConfirmModal open={!!del} danger busy={deleting} title={`Delete ${del?.name ?? 'listing'}?`} confirmLabel="Delete listing"
+        message="This removes the pair from the marketplace. It can't be undone."
+        onClose={() => setDel(null)}
+        onConfirm={() => del && router.delete(`/listings/${del.slug}`, {
+          preserveScroll: true,
+          onStart: () => setDeleting(true),
+          onFinish: () => setDeleting(false),
+          onSuccess: () => setDel(null),
+        })} />
     </AppLayout>
   );
 }
