@@ -43,4 +43,14 @@ class PageController extends Controller
     }
 
     public function signIn(): Response { return Inertia::render('SignIn'); }
+
+    public function sellers(): Response
+{
+    $sellers = Seller::withCount(['sneakers as listings' => fn ($q) => $q->whereNull('sold_at')])
+        ->get()
+        ->map(fn ($s) => $s->toCard() + ['listings' => $s->listings]);
+
+    return Inertia::render('Sellers', ['sellers' => $sellers]);
+}
+
 }

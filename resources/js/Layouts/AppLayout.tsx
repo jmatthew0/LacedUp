@@ -3,7 +3,7 @@ import { FormEvent, PropsWithChildren, useEffect, useRef, useState } from 'react
 import Bell from '@/Components/Bell';
 
 const nav = ['New In', 'Men', 'Women', 'Kids', 'Retro', 'Sellers'];
-const navHref = (n: string) => `/search?q=${n === 'Retro' ? 'retro' : ''}`;
+const navHref = (n: string) => (n === 'Sellers' ? '/sellers' : `/search?q=${n === 'Retro' ? 'retro' : ''}`);
 
 interface User { id: number; name: string; email: string }
 interface Shared { auth: { user: User | null }; [key: string]: unknown }

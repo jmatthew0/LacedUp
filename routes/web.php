@@ -20,6 +20,7 @@ use App\Http\Controllers\MessageController;
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
 Route::get('/sneakers/{slug}', [ProductController::class, 'show'])->name('sneakers.show');
 Route::get('/search', [PageController::class, 'search']);
+Route::get('/sellers', [PageController::class, 'sellers']);
 Route::get('/sellers/{handle}', [PageController::class, 'seller']);
 
 // Guests only
