@@ -58,4 +58,9 @@ public function offers(): HasMany
     return $this->hasMany(Offer::class);
 }
 
+public function addresses(): HasMany
+{
+    return $this->hasMany(Address::class);
+}
+
 }
