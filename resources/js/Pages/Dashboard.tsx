@@ -4,6 +4,7 @@ import ConfirmModal from '@/Components/ConfirmModal';
 import Modal from '@/Components/Modal';
 import AppLayout from '@/Layouts/AppLayout';
 import { peso } from '@/lib/format';
+import CaseList, { CaseRow } from '@/Components/CaseList';
 
 interface Row { slug: string; name: string; image: string; sizes: number[]; price: number; status: string }
 interface Offer { id: number; name: string; size: string | null; asking: number; amount: number; buyer: string }
@@ -13,7 +14,9 @@ interface Props {
   listings: Row[];
   toShip: { name: string; size: string | null; code: string }[];
   offers: Offer[];
+  cases: CaseRow[];
 }
+
 
 function OfferRow({ o }: { o: Offer }) {
   const [counter, setCounter] = useState(false);
@@ -57,7 +60,7 @@ function OfferRow({ o }: { o: Offer }) {
   );
 }
 
-export default function Dashboard({ seller, stats, listings, toShip, offers }: Props) {
+export default function Dashboard({ seller, stats, listings, toShip, offers, cases }: Props) {
   const [del, setDel] = useState<Row | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -105,6 +108,7 @@ export default function Dashboard({ seller, stats, listings, toShip, offers }: P
           </div>
         )) : <p className="border-t border-stone pt-3 text-sm text-black/60">Nothing to ship right now.</p>}
       </section>
+      <CaseList cases={cases} />
 
       <section className="mt-6 overflow-x-auto rounded-2xl bg-white p-5">
         <h2 className="display mb-3 text-base">Listings</h2>
