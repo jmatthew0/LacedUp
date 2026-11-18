@@ -1,5 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import ConfirmModal from '@/Components/ConfirmModal';
+import Modal from '@/Components/Modal';
 import AccountLayout from '@/Layouts/AccountLayout';
 import { peso } from '@/lib/format';
 
@@ -15,13 +17,16 @@ const badgeText: Record<string, string> = { pending: 'Active', countered: 'Count
 
 function Card({ o }: { o: Offer }) {
   const [raising, setRaising] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [value, setValue] = useState(0);
   const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
   const post = (url: string, data: Record<string, string | number> = {}) => router.post(url, data, { preserveScroll: true });
   const btn = 'rounded-full px-4 py-2 text-xs font-semibold';
   const dark = `${btn} bg-ink text-white`;
   const line = `${btn} border border-ink/40`;
   const ghost = 'px-3 py-2 text-xs text-black/60 hover:text-ink';
+  const gone = o.sold && o.status !== 'accepted';
 
   return (
     <article className="rounded-2xl bg-white p-5">
@@ -33,11 +38,9 @@ function Card({ o }: { o: Offer }) {
               <Link href={`/sneakers/${o.sneaker.slug}`} className="text-sm font-bold hover:text-ember">{o.sneaker.name}{o.size ? ` · US ${o.size}` : ''}</Link>
               <p className="text-xs text-black/60">{o.sneaker.condition} · from {o.sneaker.seller}</p>
             </div>
-            <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${o.sold && o.status !== 'accepted' ? 'border border-ink' : badge[o.status]}`}>{o.sold && o.status !== 'accepted' ? 'Pair sold' : badgeText[o.status]}</span>
+            <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${gone ? 'border border-ink' : badge[o.status]}`}>{gone ? 'Pair sold' : badgeText[o.status]}</span>
           </div>
-          <p className="mt-2 flex items-baseline gap-3 text-xs text-black/60">
-            <s>{peso(o.sneaker.price)}</s>Your offer <b className="display text-xl text-ink">{peso(o.amount)}</b>
-          </p>
+          <p className="mt-2 flex items-baseline gap-3 text-xs text-black/60"><s>{peso(o.sneaker.price)}</s>Your offer <b className="display text-xl text-ink">{peso(o.amount)}</b></p>
           {o.status === 'countered' && o.counter && (
             <p className="mt-2 inline-block rounded-xl border border-ember bg-ember/5 px-4 py-2 text-xs text-black/60">Seller counter<br /><b className="display text-xl text-ink">{peso(o.counter)}</b></p>
           )}
@@ -46,19 +49,11 @@ function Card({ o }: { o: Offer }) {
         </div>
       </div>
 
-      {raising && (
-        <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-          <input type="number" placeholder={`Above ${o.amount}`} value={value || ''} onChange={(e) => setValue(+e.target.value)} className="w-36 rounded-full bg-paper px-4 py-2 text-xs" />
-          <button disabled={!value} onClick={() => router.patch(`/offers/${o.id}/raise`, { amount: value }, { preserveScroll: true, onError: (e) => setError(e.amount ?? ''), onSuccess: () => setRaising(false) })} className={`${dark} disabled:opacity-40`}>Send raise</button>
-        </div>
-      )}
-      {error && <p className="mt-1 text-right text-xs text-ember">{error}</p>}
-
-      {!(o.sold && o.status !== 'accepted') && (
+      {!gone && (
         <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-stone pt-4">
           {o.status === 'pending' && (<>
-            <button onClick={() => setRaising(!raising)} className={line}>Raise offer</button>
-            <button onClick={() => confirm('Cancel this offer?') && router.delete(`/offers/${o.id}`, { preserveScroll: true })} className={ghost}>Cancel offer</button>
+            <button onClick={() => setRaising(true)} className={line}>Raise offer</button>
+            <button onClick={() => setCancelling(true)} className={ghost}>Cancel offer</button>
           </>)}
           {o.status === 'countered' && (<>
             <button onClick={() => post(`/offers/${o.id}/reply`, { action: 'decline' })} className={ghost}>Decline counter</button>
@@ -74,6 +69,30 @@ function Card({ o }: { o: Offer }) {
           </>)}
         </div>
       )}
+
+      <Modal open={raising} onClose={() => { setRaising(false); setError(''); }} title="Raise your offer">
+        <p className="text-sm text-black/70">Your offer on {o.sneaker.name} is <b>{peso(o.amount)}</b>. Asking price is {peso(o.sneaker.price)}.</p>
+        <label className="mt-4 block text-xs font-semibold">New offer (₱)
+          <input type="number" autoFocus value={value || ''} onChange={(e) => setValue(+e.target.value)} className="mt-1 w-full rounded-full bg-paper px-4 py-3 text-sm font-normal" />
+        </label>
+        <p className="mt-1 px-2 text-[11px] text-black/50">Must be above {peso(o.amount)} and below {peso(o.sneaker.price)}</p>
+        {error && <p className="mt-3 text-xs text-ember">{error}</p>}
+        <div className="mt-6 flex justify-end gap-2">
+          <button onClick={() => setRaising(false)} className="rounded-full border border-ink/40 px-5 py-2.5 text-sm">Cancel</button>
+          <button disabled={!value || busy} onClick={() => router.patch(`/offers/${o.id}/raise`, { amount: value }, {
+            preserveScroll: true,
+            onStart: () => { setBusy(true); setError(''); },
+            onFinish: () => setBusy(false),
+            onError: (e) => setError(e.amount ?? 'Could not raise the offer.'),
+            onSuccess: () => setRaising(false),
+          })} className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-40">{busy ? 'Sending' : 'Send raise'}</button>
+        </div>
+      </Modal>
+
+      <ConfirmModal open={cancelling} danger title="Cancel this offer?" confirmLabel="Cancel offer" cancelLabel="Keep offer"
+        message={`Your ${peso(o.amount)} offer on ${o.sneaker.name} will be withdrawn. You can make a new offer later.`}
+        onClose={() => setCancelling(false)}
+        onConfirm={() => router.delete(`/offers/${o.id}`, { preserveScroll: true, onSuccess: () => setCancelling(false) })} />
     </article>
   );
 }
