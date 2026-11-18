@@ -1,4 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
+import ConfirmModal from '@/Components/ConfirmModal';
 import AppLayout from '@/Layouts/AppLayout';
 import { peso } from '@/lib/format';
 import { OrderData, OrderItem } from '@/types';
@@ -46,6 +48,7 @@ function ReviewBox({ code, item }: { code: string; item: OrderItem }) {
 export default function Tracking({ order }: { order: OrderData }) {
   const at = order.stage;
   const a = order.address;
+  const [confirming, setConfirming] = useState(false);
 
   return (
     <AppLayout>
@@ -87,7 +90,7 @@ export default function Tracking({ order }: { order: OrderData }) {
           <p className="border-t border-stone pt-3">Total <b>{peso(order.total)}</b> · {order.paymentMethod}</p>
           <p className="rounded-lg bg-paper p-3">Deliver to<br /><b>{a.name}</b><br />{a.address}, {a.city} {a.postal}<br />{order.shippingMethod}</p>
 
-          <button disabled={at < 4 || order.confirmed} onClick={() => router.post(`/orders/${order.code}/confirm`, {}, { preserveScroll: true })}
+          <button disabled={at < 4 || order.confirmed} onClick={() => setConfirming(true)}
             className="w-full rounded-full bg-ink py-2.5 font-semibold text-white disabled:opacity-30">
             {order.confirmed ? 'Delivery confirmed' : 'Confirm delivery'}
           </button>
@@ -101,6 +104,10 @@ export default function Tracking({ order }: { order: OrderData }) {
           </div>
         </aside>
       </div>
+      <ConfirmModal open={confirming} title="Confirm delivery?" confirmLabel="Yes, it arrived"
+        message="Confirming tells us the pair arrived as described and releases the payment to the seller. You can't undo this."
+        onClose={() => setConfirming(false)}
+        onConfirm={() => router.post(`/orders/${order.code}/confirm`, {}, { preserveScroll: true, onSuccess: () => setConfirming(false) })} />
     </AppLayout>
   );
 }
