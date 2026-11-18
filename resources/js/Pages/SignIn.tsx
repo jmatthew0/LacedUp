@@ -27,11 +27,6 @@ export default function SignIn() {
           <h1 className="display text-6xl">Discover. Buy. Sell.</h1>
           <p className="mt-4 max-w-sm text-sm text-white/70">Every pair is authenticated and every payment is held in escrow until you confirm delivery.</p>
         </div>
-        <dl className="flex gap-8">
-          <div><dd className="display text-2xl">48K</dd><dt className="text-[10px]">Sales</dt></div>
-          <div><dd className="display text-2xl">4.9</dd><dt className="text-[10px]">Avg rating</dt></div>
-          <div><dd className="display text-2xl">48h</dd><dt className="text-[10px]">Shipping</dt></div>
-        </dl>
       </div>
 
       <div className="grid place-items-center p-8">
