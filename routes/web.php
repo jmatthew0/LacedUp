@@ -14,6 +14,7 @@ use App\Http\Controllers\SavedController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MessageController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -69,4 +70,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/notifications/{id}', [NotificationController::class, 'open']);
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll']);
+
+    Route::get('/messages/{conversation?}', [MessageController::class, 'index']);
+    Route::post('/messages/start', [MessageController::class, 'start']);
+    Route::post('/messages/{conversation}', [MessageController::class, 'send']);
 });

@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Conversation;
 
 class OfferController extends Controller
 {
@@ -61,6 +62,15 @@ class OfferController extends Controller
             "New offer of ₱".number_format($data['amount'])." on {$sneaker->name} from {$user->name}",
             '/dashboard',
         ));
+
+        if ($sneaker->seller->user_id) {
+            $chat = Conversation::firstOrCreate(
+                ['buyer_id' => $user->id, 'seller_id' => $sneaker->seller->user_id, 'sneaker_id' => $sneaker->id],
+                ['last_message_at' => now()],
+            );
+            $chat->messages()->create(['user_id' => $user->id, 'kind' => 'system', 'body' => 'Offer ₱'.number_format($data['amount']).' sent']);
+            $chat->update(['last_message_at' => now()]);
+        }
 
         return redirect('/offers');
     }
