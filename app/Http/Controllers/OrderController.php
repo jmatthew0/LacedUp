@@ -5,24 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\OrderItem;
 use App\Models\Review;
 use App\Models\Seller;
+use App\Notifications\AppNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Notifications\AppNotification;
 
 class OrderController extends Controller
 {
     public function index(Request $request): Response
     {
         return Inertia::render('Orders', [
-            'orders' => $request->user()->orders()->with('items.review')->latest()->get()->map->toCard(),
+            'orders' => $request->user()->orders()->with(['items.review', 'disputes'])->latest()->get()->map->toCard(),
         ]);
     }
 
     public function show(Request $request, string $code): Response
     {
-        $order = $request->user()->orders()->with('items.review')->where('code', $code)->firstOrFail();
+        $order = $request->user()->orders()->with(['items.review', 'disputes'])->where('code', $code)->firstOrFail();
 
         return Inertia::render('Tracking', ['order' => $order->toCard()]);
     }
@@ -31,8 +31,12 @@ class OrderController extends Controller
     public function advance(Request $request, string $code): RedirectResponse
     {
         $order = $request->user()->orders()->where('code', $code)->firstOrFail();
+
         if ($order->stage < 4) {
             $order->increment('stage');
+            if ($order->stage >= 4) {
+                $order->update(['delivered_at' => now()]);
+            }
         }
 
         return back();
@@ -69,7 +73,6 @@ class OrderController extends Controller
         ]);
 
         $seller->update(['rating' => round(Review::where('seller_id', $seller->id)->avg('rating'), 1)]);
-
         $seller->user?->notify(new AppNotification("{$request->user()->name} left you a {$data['rating']}-star review", "/sellers/{$seller->handle}"));
 
         return back();

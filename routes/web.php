@@ -15,6 +15,7 @@ use App\Http\Controllers\OfferController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\DisputeController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -80,4 +81,7 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/offers/{offer}/raise', [OfferController::class, 'raise']);
     Route::delete('/offers/{offer}', [OfferController::class, 'destroy']);
+
+    Route::post('/orders/{code}/disputes', [DisputeController::class, 'store']);
+    Route::post('/disputes/{dispute}/respond', [DisputeController::class, 'respond']);
 });

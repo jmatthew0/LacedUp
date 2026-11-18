@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Notifications\AppNotification;
+use App\Models\Dispute;
 
 class DashboardController extends Controller
 {
@@ -45,7 +46,14 @@ class DashboardController extends Controller
                     'id' => $o->id, 'name' => $o->sneaker->name, 'size' => $o->size,
                     'asking' => $o->sneaker->price, 'amount' => $o->amount, 'buyer' => $o->buyer->name,
                 ])->values(),
-        ]);
+                'cases' => Dispute::where('status', 'open')
+                ->whereHas('order.items', fn ($q) => $q->where('seller', $seller->handle))
+                ->with(['order', 'user'])->latest()->get()
+                ->map(fn ($d) => [
+                    'id' => $d->id, 'type' => $d->type, 'reason' => $d->reason, 'details' => $d->details,
+                    'code' => $d->order->code, 'buyer' => $d->user->name, 'date' => $d->created_at->format('M j'),
+                ])->values(),
+                    ]);
     }
 
     public function ship(Request $request, string $code): RedirectResponse
