@@ -6,7 +6,7 @@ import { peso } from '@/lib/format';
 import { Sneaker } from '@/types';
 
 type Result = Sneaker & { brand: string; type: string; aud: string };
-interface Props { q: string; results: Result[]; suggestion: string | null }
+interface Props { q: string; results: Result[]; suggestion: string | null; close?: boolean }
 
 const sorts = ['Price: Low to High', 'Price: High to Low', 'Name: A to Z'];
 const categories = ['Men', 'Women', 'Kids'];
@@ -36,8 +36,8 @@ function Card({ r }: { r: Result }) {
   );
 }
 
-function Inner({ q, results, suggestion }: Props) {
-  const ceil = useMemo(() => Math.max(2000, Math.ceil(Math.max(0, ...results.map((r) => r.price)) / 1000) * 1000), [results]);
+function Inner({ q, results, suggestion, close }: Props) {
+  const ceil = useMemo(() => Math.max(12000, Math.ceil(Math.max(0, ...results.map((r) => r.price)) / 1000) * 1000), [results]);
   const sizes = useMemo(() => Array.from(new Set([...baseSizes, ...results.flatMap((r) => r.sizes)])).sort((a, b) => a - b), [results]);
   const brandList = useMemo(() => Array.from(new Set(results.map((r) => r.brand))).sort(), [results]);
 
@@ -82,6 +82,7 @@ function Inner({ q, results, suggestion }: Props) {
       <p className="mt-6 text-[10px] font-semibold uppercase tracking-wider text-ember">Search</p>
       <h1 className="display text-4xl sm:text-5xl">{q ? `Results for “${q}”` : 'All pairs'}</h1>
       {suggestion && <p className="mt-2 text-xs text-black/60">Did you mean <Link href={`/search?q=${encodeURIComponent(suggestion)}`} className="font-semibold text-ink underline">{suggestion}</Link>?</p>}
+      {close && <p className="mt-2 text-xs text-black/60">No exact matches, so these are the closest pairs.</p>}
 
       <form onSubmit={search} className="mt-4 flex max-w-md gap-2">
         <input value={text} onChange={(e) => setText(e.target.value)} aria-label="Search" placeholder="Search models, brands, sellers" className="min-w-0 flex-1 rounded-full bg-white px-4 py-2.5 text-sm" />

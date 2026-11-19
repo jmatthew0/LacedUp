@@ -15,8 +15,9 @@ class PageController extends Controller
 
     public function search(Request $r): Response
 {
-    $q = trim((string) $r->query('q', ''));
-    $words = preg_split('/\s+/', strtolower($q), -1, PREG_SPLIT_NO_EMPTY);
+    // Ignore punctuation, so "runer." searches the same as "runer".
+    $q = trim(preg_replace('/\s+/', ' ', preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', (string) $r->query('q', ''))));
+    $words = $q === '' ? [] : explode(' ', mb_strtolower($q));
 
     $all = Sneaker::available()->with('seller')->get()->map(function ($s) {
         [$type, $aud] = array_pad(explode(' · ', $s->category, 2), 2, '');
@@ -28,22 +29,47 @@ class PageController extends Controller
         ];
     });
 
-    $results = $all->filter(function ($s) use ($words) {
-        $hay = strtolower(implode(' ', [$s['name'], $s['category'], $s['brand'], $s['seller'], $s['condition']]));
-        foreach ($words as $w) {
-            if (! str_contains($hay, $w)) {
+    $haystack = fn ($s) => mb_strtolower(implode(' ', [$s['name'], $s['category'], $s['brand'], $s['seller'], $s['condition']]));
+
+    // 1) exact: every word appears somewhere
+    $exact = fn ($s) => collect($words)->every(fn ($w) => str_contains($haystack($s), $w));
+
+    // 2) close: a word may be off by a letter or two (runer -> runner)
+    $fuzzy = function ($s) use ($words, $haystack) {
+        $hay = $haystack($s);
+        $tokens = preg_split('/[^\p{L}\p{N}]+/u', $hay, -1, PREG_SPLIT_NO_EMPTY);
+
+        return collect($words)->every(function ($w) use ($hay, $tokens) {
+            if (str_contains($hay, $w)) {
+                return true;
+            }
+            if (mb_strlen($w) < 4) {
                 return false;
             }
-        }
+            $allowed = mb_strlen($w) >= 7 ? 2 : 1;
+            foreach ($tokens as $t) {
+                if (levenshtein($w, $t) <= $allowed) {
+                    return true;
+                }
+            }
 
-        return true;
-    })->values();
+            return false;
+        });
+    };
+
+    $results = $all->filter($exact)->values();
+    $close = false;
+
+    if ($results->isEmpty() && $words) {
+        $results = $all->filter($fuzzy)->values();
+        $close = $results->isNotEmpty();
+    }
 
     $suggestion = null;
     if ($q !== '' && $results->isEmpty()) {
         $best = 0;
         foreach ($all->pluck('name')->unique() as $name) {
-            similar_text(strtolower($q), strtolower($name), $pct);
+            similar_text(mb_strtolower($q), mb_strtolower($name), $pct);
             if ($pct > $best) {
                 $best = $pct;
                 $suggestion = $name;
@@ -54,7 +80,7 @@ class PageController extends Controller
         }
     }
 
-    return Inertia::render('Search', ['q' => $q, 'results' => $results, 'suggestion' => $suggestion]);
+    return Inertia::render('Search', ['q' => $q, 'results' => $results, 'suggestion' => $suggestion, 'close' => $close]);
 }
 
     public function seller(string $handle): Response
