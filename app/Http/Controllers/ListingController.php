@@ -9,13 +9,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ListingController extends Controller
 {
+    private const TYPES = ['Retro', 'Court', 'Runner', 'Trail', 'Mid', 'Slides', 'Other'];
+    private const AUDIENCES = ["Men's", "Women's", 'Unisex', "Kids'"];
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'model' => ['required', 'exists:sneakers,slug'],
+            'name' => ['required', 'string', 'min:2', 'max:80'],
+            'type' => ['required', Rule::in(self::TYPES)],
+            'audience' => ['required', Rule::in(self::AUDIENCES)],
+            'model' => ['nullable', 'exists:sneakers,slug'],
             'size' => ['required', 'numeric', 'between:3,16'],
             'condition' => ['required', Rule::in(['Deadstock', 'Like new', 'Worn once', 'Good condition'])],
             'price' => ['required', 'integer', 'min:100', 'max:500000'],
@@ -23,6 +30,14 @@ class ListingController extends Controller
             'box_included' => ['boolean'],
             'receipt_included' => ['boolean'],
         ]);
+
+        // Use the starter photo only when the name still matches that starter model.
+        $template = ! empty($data['model']) ? Sneaker::where('slug', $data['model'])->first() : null;
+        $template = $template && strcasecmp($template->name, trim($data['name'])) === 0 ? $template : null;
+
+        if (! $request->hasFile('photo') && ! $template) {
+            throw ValidationException::withMessages(['photo' => 'Add a photo of your pair.']);
+        }
 
         $user = $request->user();
         $seller = $user->seller ?? Seller::create([
@@ -33,16 +48,17 @@ class ListingController extends Controller
             'sales' => 0, 'rating' => 5.0, 'on_time' => 100,
         ]);
 
-        $template = Sneaker::where('slug', $data['model'])->firstOrFail();
         $image = $request->hasFile('photo')
             ? Storage::url($request->file('photo')->store('listings', 'public'))
             : $template->image;
 
+        $name = trim($data['name']);
+
         Sneaker::create([
             'seller_id' => $seller->id,
-            'slug' => Str::slug($template->name).'-'.Str::lower(Str::random(5)),
-            'name' => $template->name,
-            'category' => $template->category,
+            'slug' => Str::slug($name).'-'.Str::lower(Str::random(5)),
+            'name' => $name,
+            'category' => $data['type'].' · '.$data['audience'],
             'condition' => $data['condition'],
             'price' => $data['price'],
             'sizes' => [$data['size'] + 0],
