@@ -20,4 +20,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+    
+        $exceptions->respond(fn ($response, $e, $request) => \App\Support\ErrorPage::handle($response, $e, $request));
     })->create();
