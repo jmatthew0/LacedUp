@@ -17,6 +17,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\DisputeController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\CatalogController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -24,6 +25,7 @@ Route::get('/sneakers/{slug}', [ProductController::class, 'show'])->name('sneake
 Route::get('/search', [PageController::class, 'search']);
 Route::get('/sellers', [PageController::class, 'sellers']);
 Route::get('/sellers/{handle}', [PageController::class, 'seller']);
+Route::get('/shop/{section}', [CatalogController::class, 'section'])->where('section', 'new-in|men|women|kids|retro');
 
 // Guests only
 Route::middleware('guest')->group(function () {
