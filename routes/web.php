@@ -26,6 +26,9 @@ Route::get('/search', [PageController::class, 'search']);
 Route::get('/sellers', [PageController::class, 'sellers']);
 Route::get('/sellers/{handle}', [PageController::class, 'seller']);
 Route::get('/shop/{section}', [CatalogController::class, 'section'])->where('section', 'new-in|men|women|kids|retro');
+Route::inertia('/terms', 'Terms');
+Route::inertia('/privacy', 'Privacy');
+Route::inertia('/help', 'Help');
 
 // Guests only
 Route::middleware('guest')->group(function () {
