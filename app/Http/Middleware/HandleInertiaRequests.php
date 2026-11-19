@@ -39,7 +39,7 @@ class HandleInertiaRequests extends Middleware
 
     return [
         ...parent::share($request),
-        'auth' => ['user' => $user?->only('id', 'name', 'email')],
+        'auth' => ['user' => $user?->only('id', 'name', 'email', 'avatar')],
         'saved' => fn () => $user?->savedSneakers()->pluck('slug') ?? [],
         'notifications' => fn () => $user ? [
             'unread' => $user->unreadNotifications()->count(),
@@ -50,6 +50,7 @@ class HandleInertiaRequests extends Middleware
                 'time' => $n->created_at->diffForHumans(),
             ]),
         ] : ['unread' => 0, 'items' => []],
+        'flash' => ['status' => fn () => $request->session()->get('status')],
     ];
 }
 }
