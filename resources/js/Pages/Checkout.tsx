@@ -9,13 +9,13 @@ const pays = ['GCash', 'Credit or debit card', 'Cash on meetup'];
 const field = 'w-full rounded-full bg-paper px-4 py-2.5 text-sm';
 type Key = 'name' | 'phone' | 'address' | 'city' | 'postal';
 
-export default function Checkout({ items, fee, addresses }: { items: BagLine[]; fee: number; addresses: AddressData[] }) {
+export default function Checkout({ items, fee, addresses, defaultPayment }: { items: BagLine[]; fee: number; addresses: AddressData[]; defaultPayment: string | null }) {
   const start = addresses.find((a) => a.isDefault) ?? addresses[0] ?? null;
   const [step, setStep] = useState(0);
   const [picked, setPicked] = useState<number | null>(start?.id ?? null);
   const form = useForm({
     name: start?.name ?? '', phone: start?.phone ?? '', address: start?.address ?? '', city: start?.city ?? '', postal: start?.postal ?? '',
-    shipping: 'Standard', payment: 'GCash', save_address: false,
+    shipping: 'Standard', payment: defaultPayment ?? 'GCash', save_address: false,
   });
   const shipCost = methods.find((m) => m[0] === form.data.shipping)![2];
   const sub = items.reduce((t, s) => t + s.price, 0);

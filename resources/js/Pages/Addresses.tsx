@@ -4,6 +4,7 @@ import ConfirmModal from '@/Components/ConfirmModal';
 import Modal from '@/Components/Modal';
 import AccountLayout from '@/Layouts/AccountLayout';
 import { AddressData } from '@/types';
+import SettingsHeader from '@/Components/SettingsHeader';
 
 const labels = ['Home', 'Work', 'Other'];
 const input = 'w-full rounded-full bg-paper px-4 py-2.5 text-sm';
@@ -62,10 +63,11 @@ export default function Addresses({ addresses }: { addresses: AddressData[] }) {
   const edit = (a: AddressData) => { setEditing(a); setModal(true); };
 
   return (
-    <AccountLayout active="addresses">
+    <AccountLayout active="settings">
       <Head title="Addresses" />
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div><h1 className="display text-4xl">Addresses</h1><p className="mt-1 text-xs text-black/60">Saved shipping addresses for faster checkout.</p></div>
+      <SettingsHeader tab="addresses" />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-black/60">Saved shipping addresses for faster checkout.</p>
         <button onClick={add} className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-white">Add address</button>
       </div>
 

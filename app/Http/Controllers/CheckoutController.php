@@ -32,6 +32,7 @@ class CheckoutController extends Controller
             'items' => $bag->map(fn ($b) => ['id' => $b->id, 'size' => $b->size, 'price' => $b->price ?? $b->sneaker->price] + $b->sneaker->toCard())->values(),
             'fee' => self::FEE,
             'addresses' => $request->user()->addresses()->orderByDesc('is_default')->orderBy('id')->get()->map->toCard(),
+            'defaultPayment' => $request->user()->default_payment,
         ]);
     }
 

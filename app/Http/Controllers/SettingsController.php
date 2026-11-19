@@ -12,29 +12,67 @@ use Inertia\Response;
 
 class SettingsController extends Controller
 {
+    private const PAYMENTS = ['GCash', 'Credit or debit card', 'Cash on meetup'];
+
     public function show(Request $request): Response
     {
-        $user = $request->user();
+        $u = $request->user();
 
-        return Inertia::render('Settings', [
-            'user' => $user->only('name', 'email'),
-            'seller' => $user->seller?->only('handle', 'bio', 'avatar'),
-        ]);
+        return Inertia::render('Settings', ['user' => [
+            'name' => $u->name, 'username' => $u->username, 'email' => $u->email, 'phone' => $u->phone,
+            'bio' => $u->bio ?? $u->seller?->bio, 'avatar' => $u->avatar ?? $u->seller?->avatar,
+        ]]);
     }
 
-    public function account(Request $request): RedirectResponse
+    public function profile(Request $request): RedirectResponse
     {
         $user = $request->user();
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'username' => ['nullable', 'alpha_dash', 'max:30', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'bio' => ['nullable', 'string', 'max:300'],
+            'avatar' => ['nullable', 'image', 'max:2048'],
         ]);
 
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar && str_starts_with($user->avatar, '/storage/')) {
+                Storage::disk('public')->delete(Str::after($user->avatar, '/storage/'));
+            }
+            $data['avatar'] = Storage::url($request->file('avatar')->store('avatars', 'public'));
+        } else {
+            unset($data['avatar']);
+        }
+
         $user->update($data);
-        $user->seller?->update(['name' => $data['name']]);
+
+        $user->seller?->update([
+            'name' => $user->name,
+            'bio' => $user->bio ?? '',
+            'avatar' => $user->avatar ?? $user->seller->avatar,
+        ]);
 
         return back();
+    }
+
+    public function payments(Request $request): Response
+    {
+        return Inertia::render('SettingsPayments', ['methods' => self::PAYMENTS, 'current' => $request->user()->default_payment ?? 'GCash']);
+    }
+
+    public function savePayment(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['method' => ['required', Rule::in(self::PAYMENTS)]]);
+        $request->user()->update(['default_payment' => $data['method']]);
+
+        return back();
+    }
+
+    public function security(): Response
+    {
+        return Inertia::render('SettingsSecurity');
     }
 
     public function password(Request $request): RedirectResponse
@@ -49,26 +87,19 @@ class SettingsController extends Controller
         return back();
     }
 
-    public function seller(Request $request): RedirectResponse
+    public function notifications(Request $request): Response
     {
-        $seller = $request->user()->seller;
-        abort_unless($seller, 403);
-
-        $data = $request->validate([
-            'bio' => ['required', 'string', 'max:300'],
-            'avatar' => ['nullable', 'image', 'max:2048'],
+        return Inertia::render('SettingsNotifications', [
+            'prefs' => ($request->user()->notification_prefs ?? []) + ['offers' => true, 'orders' => true, 'reviews' => true],
         ]);
+    }
 
-        $update = ['bio' => $data['bio']];
-
-        if ($request->hasFile('avatar')) {
-            if ($seller->avatar && str_starts_with($seller->avatar, '/storage/')) {
-                Storage::disk('public')->delete(Str::after($seller->avatar, '/storage/'));
-            }
-            $update['avatar'] = Storage::url($request->file('avatar')->store('avatars', 'public'));
-        }
-
-        $seller->update($update);
+    public function saveNotifications(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'offers' => ['required', 'boolean'], 'orders' => ['required', 'boolean'], 'reviews' => ['required', 'boolean'],
+        ]);
+        $request->user()->update(['notification_prefs' => $data]);
 
         return back();
     }

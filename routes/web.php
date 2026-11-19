@@ -74,9 +74,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{code}/items/{item}/review', [OrderController::class, 'review']);
 
     Route::get('/settings', [SettingsController::class, 'show']);
-    Route::patch('/settings/account', [SettingsController::class, 'account']);
+    Route::post('/settings/profile', [SettingsController::class, 'profile']);
+    Route::get('/settings/payments', [SettingsController::class, 'payments']);
+    Route::post('/settings/payments', [SettingsController::class, 'savePayment']);
+    Route::get('/settings/security', [SettingsController::class, 'security']);
     Route::put('/settings/password', [SettingsController::class, 'password']);
-    Route::post('/settings/seller', [SettingsController::class, 'seller']);
+    Route::get('/settings/notifications', [SettingsController::class, 'notifications']);
+    Route::post('/settings/notifications', [SettingsController::class, 'saveNotifications']);
 
     Route::get('/notifications/{id}', [NotificationController::class, 'open']);
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll']);
