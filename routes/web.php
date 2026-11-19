@@ -18,6 +18,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\DisputeController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\SupportController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -29,6 +30,7 @@ Route::get('/shop/{section}', [CatalogController::class, 'section'])->where('sec
 Route::inertia('/terms', 'Terms');
 Route::inertia('/privacy', 'Privacy');
 Route::inertia('/help', 'Help');
+Route::post('/support', [SupportController::class, 'store'])->middleware('throttle:5,1');
 
 // Guests only
 Route::middleware('guest')->group(function () {
