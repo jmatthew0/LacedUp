@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sneaker extends Model
 {
-    protected $fillable = ['seller_id', 'slug', 'name', 'category', 'condition', 'price', 'sizes', 'image', 'blurb', 'featured', 'sold_at'];
+    protected $fillable = ['seller_id', 'slug', 'name', 'category', 'condition', 'price', 'sizes', 'image', 'blurb', 'featured', 'sold_at', 'box_included', 'receipt_included'];
 
-    protected $casts = ['sizes' => 'array', 'featured' => 'boolean', 'sold_at' => 'datetime'];
+    protected $casts = ['sizes' => 'array', 'featured' => 'boolean', 'sold_at' => 'datetime', 'box_included' => 'boolean', 'receipt_included' => 'boolean'];
 
     public function seller(): BelongsTo
     {

@@ -91,6 +91,8 @@ class DemoSeeder extends Seeder
             'slug' => Str::slug($t['name']).'-'.Str::lower(Str::random(5)),
             'name' => $t['name'], 'category' => $t['category'], 'condition' => $condition,
             'price' => $price, 'sizes' => [$size], 'image' => $t['image'],
+            'box_included' => in_array($condition, ['Deadstock', 'Like new'], true),
+            'receipt_included' => $condition === 'Deadstock',
         ]);
     }
 

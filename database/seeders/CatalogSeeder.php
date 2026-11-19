@@ -37,6 +37,8 @@ class CatalogSeeder extends Seeder
                 'condition' => $s['condition'], 'price' => $s['price'], 'sizes' => $s['sizes'],
                 'image' => $s['image'], 'blurb' => $blurbs[$s['slug']] ?? null,
                 'featured' => isset($blurbs[$s['slug']]),
+                'box_included' => in_array($s['condition'], ['Deadstock', 'Like new'], true),
+                'receipt_included' => $s['condition'] === 'Deadstock',
             ]);
         }
     }
