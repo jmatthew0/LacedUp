@@ -7,18 +7,55 @@ use App\Models\Sneaker;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Data\ModelInfo;
 
 class PageController extends Controller
 {
     private function all() { return Sneaker::available()->with('seller')->get()->map->toCard(); }
 
     public function search(Request $r): Response
-    {
-        $q = strtolower((string) $r->query('q', ''));
-        $res = $this->all()->filter(fn ($s) => $q === '' || str_contains(strtolower($s['name'].' '.$s['category']), $q))->values();
+{
+    $q = trim((string) $r->query('q', ''));
+    $words = preg_split('/\s+/', strtolower($q), -1, PREG_SPLIT_NO_EMPTY);
 
-        return Inertia::render('Search', ['q' => $q, 'results' => $res]);
+    $all = Sneaker::available()->with('seller')->get()->map(function ($s) {
+        [$type, $aud] = array_pad(explode(' · ', $s->category, 2), 2, '');
+
+        return $s->toCard() + [
+            'brand' => ModelInfo::for($s->name)['brand'] ?? 'Other',
+            'type' => trim($type),
+            'aud' => trim($aud),
+        ];
+    });
+
+    $results = $all->filter(function ($s) use ($words) {
+        $hay = strtolower(implode(' ', [$s['name'], $s['category'], $s['brand'], $s['seller'], $s['condition']]));
+        foreach ($words as $w) {
+            if (! str_contains($hay, $w)) {
+                return false;
+            }
+        }
+
+        return true;
+    })->values();
+
+    $suggestion = null;
+    if ($q !== '' && $results->isEmpty()) {
+        $best = 0;
+        foreach ($all->pluck('name')->unique() as $name) {
+            similar_text(strtolower($q), strtolower($name), $pct);
+            if ($pct > $best) {
+                $best = $pct;
+                $suggestion = $name;
+            }
+        }
+        if ($best < 40) {
+            $suggestion = null;
+        }
     }
+
+    return Inertia::render('Search', ['q' => $q, 'results' => $results, 'suggestion' => $suggestion]);
+}
 
     public function seller(string $handle): Response
 {
