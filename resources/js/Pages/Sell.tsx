@@ -11,7 +11,7 @@ export default function Sell({ models }: { models: Sneaker[] }) {
   const [step, setStep] = useState(0);
   const [q, setQ] = useState('');
   const [model, setModel] = useState<Sneaker | null>(null);
-  const form = useForm({ model: '', size: 9, condition: conditions[0], price: 0, photo: null as File | null });
+  const form = useForm({ model: '', size: 9, condition: conditions[0], price: 0, photo: null as File | null, box_included: true, receipt_included: false });
 
   const preview = useMemo(() => (form.data.photo ? URL.createObjectURL(form.data.photo) : model?.image), [form.data.photo, model]);
   const ok = [!!model, true, true, form.data.price > 0][step];
@@ -61,6 +61,17 @@ export default function Sell({ models }: { models: Sneaker[] }) {
               </div>
             </div>
           )}
+
+        {step === 2 && (
+          <div className="mt-4 space-y-2 border-t border-stone pt-4 text-sm">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="accent-ember" checked={form.data.box_included} onChange={(e) => form.setData('box_included', e.target.checked)} />Original box included
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="accent-ember" checked={form.data.receipt_included} onChange={(e) => form.setData('receipt_included', e.target.checked)} />Receipt included
+            </label>
+          </div>
+        )}
 
           {step === 3 && (
             <label className="mt-4 block text-sm">Ask price (₱)

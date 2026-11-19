@@ -20,6 +20,8 @@ class ListingController extends Controller
             'condition' => ['required', Rule::in(['Deadstock', 'Like new', 'Worn once', 'Good condition'])],
             'price' => ['required', 'integer', 'min:100', 'max:500000'],
             'photo' => ['nullable', 'image', 'max:4096'],
+            'box_included' => ['boolean'],
+            'receipt_included' => ['boolean'],
         ]);
 
         $user = $request->user();
@@ -45,6 +47,8 @@ class ListingController extends Controller
             'price' => $data['price'],
             'sizes' => [$data['size'] + 0],
             'image' => $image,
+            'box_included' => $request->boolean('box_included'),
+            'receipt_included' => $request->boolean('receipt_included'),
         ]);
 
         return redirect('/dashboard');
