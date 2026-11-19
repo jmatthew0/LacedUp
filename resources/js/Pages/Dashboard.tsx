@@ -121,7 +121,12 @@ export default function Dashboard({ seller, stats, listings, toShip, offers, cas
                   <td className="flex items-center gap-3 py-3 font-semibold"><img src={s.image} alt="" className="h-10 w-10 rounded-lg bg-stone object-contain" />{s.name}</td>
                   <td>{s.sizes.join(' · ')}</td><td>{peso(s.price)}</td>
                   <td><span className={`rounded-full px-2.5 py-0.5 ${s.status === 'Sold' ? 'bg-paper' : 'bg-ink text-white'}`}>{s.status}</span></td>
-                  <td className="text-right">{s.status === 'Active' && <button onClick={() => setDel(s)} className="underline">Delete</button>}</td>
+                  <td className="space-x-3 whitespace-nowrap text-right">
+                  {s.status === 'Active' && (<>
+                    <Link href={`/listings/${s.slug}/edit`} className="underline">Edit</Link>
+                    <button onClick={() => setDel(s)} className="underline">Delete</button>
+                  </>)}
+                </td>
                 </tr>
               ))}
             </tbody>

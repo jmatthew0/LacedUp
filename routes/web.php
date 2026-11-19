@@ -107,4 +107,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/addresses/{address}', [AddressController::class, 'update']);
     Route::post('/addresses/{address}/default', [AddressController::class, 'makeDefault']);
     Route::delete('/addresses/{address}', [AddressController::class, 'destroy']);
+    Route::get('/listings/{sneaker:slug}/edit', [ListingController::class, 'edit']);
+    Route::put('/listings/{sneaker:slug}', [ListingController::class, 'update']);
 });
