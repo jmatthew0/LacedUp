@@ -5,6 +5,10 @@ import { createRoot } from 'react-dom/client';
 
 createInertiaApp({
   title: (t) => (t ? `${t} — Laced Up` : 'Laced Up — Sneaker Marketplace'),
-  resolve: (name) => resolvePageComponent(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx')),
-  setup({ el, App, props }) { createRoot(el).render(<App {...props} />); },
+  // Pages load lazily. The cast only satisfies Inertia's stricter types.
+  resolve: (name) => resolvePageComponent(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx')) as never,
+  setup({ el, App, props }) {
+    if (!el) return;
+    createRoot(el).render(<App {...props} />);
+  },
 });
