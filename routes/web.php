@@ -19,6 +19,7 @@ use App\Http\Controllers\DisputeController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\PasswordResetController;
 
 // Public
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -37,6 +38,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/sign-in', [PageController::class, 'signIn'])->name('login');
     Route::post('/sign-in', [AuthController::class, 'login']);
     Route::post('/sign-up', [AuthController::class, 'register']);
+    Route::get('/forgot-password', [PasswordResetController::class, 'request']);
+    Route::post('/forgot-password', [PasswordResetController::class, 'email'])->middleware('throttle:5,1');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'reset'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update']);
 });
 
 // Signed-in only

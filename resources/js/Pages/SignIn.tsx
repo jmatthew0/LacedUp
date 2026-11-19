@@ -1,5 +1,7 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+
+const status = (usePage().props.flash as { status?: string } | undefined)?.status;
 
 export default function SignIn() {
   const [mode, setMode] = useState<'in' | 'up'>('in');
@@ -41,6 +43,8 @@ export default function SignIn() {
           </div>
           <h2 className="display text-3xl">{mode === 'in' ? 'Welcome back' : 'Join Laced Up'}</h2>
 
+          {status && <p role="status" className="rounded-xl bg-green-50 px-4 py-2 text-xs text-green-800">{status}</p>}
+
           {mode === 'up' && (
             <div>
               <input className={input} placeholder="Full name" aria-label="Full name" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
@@ -61,6 +65,8 @@ export default function SignIn() {
               Remember me on this device
             </label>
           )}
+
+        {mode === 'in' && <Link href="/forgot-password" className="block text-right text-xs underline">Forgot password?</Link>}
           <button disabled={form.processing} className="w-full rounded-full bg-ink py-3 text-sm font-semibold text-white disabled:opacity-50">
             {form.processing ? 'Please wait' : mode === 'in' ? 'Sign in' : 'Create account'}
           </button>
